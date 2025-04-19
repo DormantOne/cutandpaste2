@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mesenteric Ischemia Concept Map</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      overflow: hidden;
+      touch-action: none; /* Prevents browser handling of touch events */
+    }
+
+    #concept-map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      cursor: move;
+    }
+
+    .concept {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .center-concept {
+      background-color: #9c27b0;
+      width: 160px;
+      height: 160px;
+      font-size: 18px;
+      z-index: 20;
+    }
+
+    .primary-concept {
+      background-color: #3f51b5;
+      width: 120px;
+      height: 120px;
+      font-size: 14px;
+    }
+
+    .secondary-concept {
+      background-color: #03a9f4;
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+    }
+
+    .tertiary-concept {
+      background-color: #4caf50;
+      width: 70px;
+      height: 70px;
+      font-size: 11px;
+    }
+
+    .concept:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .connection {
+      position: absolute;
+      background-color: #7986cb;
+      z-index: 5;
+      transform-origin: left center;
+    }
+
+    .thick-connection {
+      height: 4px;
+    }
+
+    .medium-connection {
+      height: 3px;
+    }
+
+    .thin-connection {
+      height: 2px;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    #detail-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+      z-index: 30;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #detail-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    #detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #999;
+    }
+
+    #detail-close:hover {
+      color: #333;
+    }
+
+    .fact-list {
+      margin-top: 10px;
+    }
+
+    .fact-item {
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .relationship-list {
+      margin-top: 15px;
+    }
+
+    .relationship-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .relationship-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 25;
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #555;
+      z-index: 25;
+      max-width: 250px;
+    }
+
+    #main-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="concept-map-container"></div>
+
+  <div id="tooltip"></div>
+
+  <div id="detail-panel">
+    <div id="detail-close">×</div>
+    <div id="detail-title"></div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="title-overlay">
+    <h1 id="main-title">Mesenteric Ischemia</h1>
+    <p id="subtitle">Interactive Mind Map</p>
+  </div>
+
+  <script>
+    // =========================
+    // DEFINE CONCEPTS & NODES
+    // =========================
+
+    // Center Concept
+    const centerConcept = {
+      id: "mesenteric-ischemia",
+      name: "MESENTERIC\nISCHEMIA",
+      type: "center-concept",
+      description: "Reduction of intestinal blood flow leading to hypoperfusion and potential tissue damage in the intestines",
+      facts: [
+        "Accounts for about 1 in 1,000 hospital admissions",
+        "Includes acute and chronic forms with distinct presentations",
+        "Mortality rate ranges from 30-80% for acute cases",
+        "Critical 6-hour window for optimal intervention in acute cases"
+      ]
+    };
+
+    // PRIMARY Concepts
+    const primaryConcepts = [
+      {
+        id: "acute-ischemia",
+        name: "Acute\nMesenteric\nIschemia",
+        type: "primary-concept",
+        angle: 0,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Sudden reduction in intestinal blood flow requiring urgent intervention",
+        facts: [
+          "Characterized by 'pain out of proportion to physical exam'",
+          "Often presents with rapid clinical deterioration",
+          "Mortality increases dramatically if diagnosis delayed beyond 6 hours",
+          "Requires immediate CT angiography for diagnosis"
+        ],
+        relationships: []
+      },
+      {
+        id: "chronic-ischemia",
+        name: "Chronic\nMesenteric\nIschemia",
+        type: "primary-concept",
+        angle: 60,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Gradual narrowing of mesenteric vessels with compensatory collateral formation",
+        facts: [
+          "Classic triad: postprandial pain, food fear, weight loss",
+          "Usually requires occlusion of 2 out of 3 main vessels",
+          "Patients do well at rest but develop symptoms with increased blood flow demands",
+          "Often has months of symptoms before diagnosis"
+        ],
+        relationships: []
+      },
+      {
+        id: "types",
+        name: "Ischemia\nTypes",
+        type: "primary-concept",
+        angle: 120,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Classification of mesenteric ischemia based on underlying pathology",
+        facts: [
+          "Arterial embolism (70% of cases) - often cardioembolic",
+          "Arterial thrombosis (15-25%) - usually in atherosclerotic vessels",
+          "Non-occlusive mesenteric ischemia (NOMI) - 20% of cases",
+          "Mesenteric venous thrombosis (5%) - often insidious presentation"
+        ],
+        relationships: []
+      },
+      {
+        id: "vascular-anatomy",
+        name: "Vascular\nAnatomy",
+        type: "primary-concept",
+        angle: 180,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Key blood vessels supplying the intestines and their distribution",
+        facts: [
+          "Celiac artery - supplies the foregut (stomach, liver, spleen)",
+          "Superior mesenteric artery (SMA) - supplies midgut (small intestine, right colon)",
+          "Inferior mesenteric artery (IMA) - supplies hindgut (left colon, rectum)",
+          "Extensive collateral pathways exist between these vessels"
+        ],
+        relationships: []
+      },
+      {
+        id: "diagnosis",
+        name: "Diagnosis",
+        type: "primary-concept",
+        angle: 240,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Diagnostic approaches for identifying mesenteric ischemia",
+        facts: [
+          "CT angiography is the gold standard diagnostic test",
+          "Laboratory findings include leukocytosis, lactic acidosis, hemoconcentration",
+          "Physical exam may show peritonitis in advanced cases",
+          "High index of suspicion needed for timely diagnosis"
+        ],
+        relationships: []
+      },
+      {
+        id: "treatment",
+        name: "Treatment\nApproaches",
+        type: "primary-concept",
+        angle: 300,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Interventions for managing mesenteric ischemia - approach varies based on cause, acuity, and patient factors",
+        facts: [
+          "Treatment strategy varies by type: embolism, thrombosis, NOMI, or venous thrombosis",
+          "Acute cases require rapid revascularization within 6-hour window",
+          "Chronic cases allow for more elective, planned interventions",
+          "Patient comorbidities often dictate surgical vs. endovascular approach"
+        ],
+        relationships: []
+      }
+    ];
+
+    // SECONDARY Concepts
+    const secondaryConcepts = [
+      {
+        id: "acute-presentation",
+        name: "Acute\nPresentation",
+        type: "secondary-concept",
+        parentId: "acute-ischemia",
+        angle: 345,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Clinical features and laboratory findings in acute mesenteric ischemia",
+        facts: [
+          "Severe abdominal pain disproportionate to physical exam",
+          "Rapid clinical deterioration with peritonitis",
+          "Elevated lactate (>7) and leukocytosis",
+          "Features of dehydration and hemoconcentration"
+        ]
+      },
+      {
+        id: "chronic-presentation",
+        name: "Chronic\nPresentation",
+        type: "secondary-concept",
+        parentId: "chronic-ischemia",
+        angle: 30,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Clinical presentation of chronic mesenteric ischemia",
+        facts: [
+          "Postprandial abdominal pain starting 30-60 minutes after eating",
+          "Food fear leading to malnutrition and weight loss",
+          "Symptoms worsen with larger meals",
+          "Imaging shows high-grade stenosis of at least 2 mesenteric vessels"
+        ]
+      },
+      {
+        id: "arterial-embolism",
+        name: "Arterial\nEmbolism",
+        type: "secondary-concept",
+        parentId: "types",
+        angle: 90,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Occlusion of mesenteric vessels by emboli from a distant source",
+        facts: [
+          "Most common form (70% of mesenteric ischemia cases)",
+          "Usually cardioembolic (atrial fibrillation, mural thrombus, endocarditis)",
+          "Abrupt onset with no collateral circulation development",
+          "Superior mesenteric artery most frequently affected"
+        ]
+      },
+      {
+        id: "arterial-thrombosis",
+        name: "Arterial\nThrombosis",
+        type: "secondary-concept",
+        parentId: "types",
+        angle: 120,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "In-situ thrombosis of atherosclerotic mesenteric vessels",
+        facts: [
+          "Accounts for 15-25% of cases",
+          "Occurs in patients with atherosclerosis, PAD, renal insufficiency",
+          "Often has subacute presentation due to collateral pathways",
+          "Usually involves multiple vessels with severe calcification"
+        ]
+      },
+      {
+        id: "nomi",
+        name: "Non-occlusive\nIschemia",
+        type: "secondary-concept",
+        parentId: "types",
+        angle: 150,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Mesenteric ischemia without arterial obstruction, usually from vasoconstriction",
+        facts: [
+          "20% of acute mesenteric ischemia cases",
+          "Common in ICU patients with cardiac disease or on vasopressors",
+          "Low-flow phenomenon affecting watershed areas",
+          "Difficult diagnosis requiring high index of suspicion"
+        ]
+      },
+      {
+        id: "collateral-circulation",
+        name: "Collateral\nCirculation",
+        type: "secondary-concept",
+        parentId: "vascular-anatomy",
+        angle: 150,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Alternative vascular pathways that develop to compensate for occluded vessels",
+        facts: [
+          "Gastroduodenal and pancreaticoduodenal arteries connect celiac to SMA",
+          "Meandering mesenteric artery connects SMA to IMA",
+          "Marginal artery of Drummond runs along colon",
+          "Can compensate for up to 75% reduction in flow for 12 hours"
+        ]
+      },
+      {
+        id: "watershed-areas",
+        name: "Watershed\nAreas",
+        type: "secondary-concept",
+        parentId: "vascular-anatomy",
+        angle: 210,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Boundary zones between different vascular territories most vulnerable to ischemia",
+        facts: [
+          "Splenic flexure (between SMA and IMA territories)",
+          "Sigmoid colon (between IMA and internal iliac arteries)",
+          "Most vulnerable during low-flow states (NOMI)",
+          "Common locations for ischemic colitis"
+        ]
+      },
+      {
+        id: "imaging",
+        name: "Imaging\nStudies",
+        type: "secondary-concept",
+        parentId: "diagnosis",
+        angle: 210,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Radiologic tests used to diagnose mesenteric ischemia",
+        facts: [
+          "CT angiography with IV contrast is the gold standard",
+          "Can identify vessel occlusion, pneumatosis, portal venous gas",
+          "Should not be delayed for other tests in suspected cases",
+          "Endoscopy is of limited value and may delay treatment"
+        ]
+      },
+      {
+        id: "endovascular",
+        name: "Endovascular\nOptions",
+        type: "secondary-concept",
+        parentId: "treatment",
+        angle: 270,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Minimally invasive approaches for revascularization",
+        facts: [
+          "Balloon angioplasty and stenting of stenotic vessels",
+          "Suction aspiration systems for thrombus removal",
+          "Can be performed via transfemoral or transbrachial approach",
+          "Less invasive but may miss bowel necrosis"
+        ]
+      },
+      {
+        id: "surgical",
+        name: "Surgical\nOptions",
+        type: "secondary-concept",
+        parentId: "treatment",
+        angle: 330,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Open surgical approaches for mesenteric ischemia",
+        facts: [
+          "Embolectomy or thrombectomy of occluded vessels",
+          "Bypass grafting (aorto-mesenteric or iliaco-mesenteric)",
+          "Resection of non-viable bowel",
+          "Second-look laparotomy within 24-48 hours"
+        ]
+      }
+    ];
+
+    // TERTIARY Concepts
+    const tertiaryConcepts = [
+      {
+        id: "venous-thrombosis",
+        name: "Venous\nThrombosis",
+        type: "tertiary-concept",
+        parentId: "types",
+        angle: 180,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Thrombosis of mesenteric veins leading to congestion and ischemia",
+        facts: [
+          "Accounts for 5% of mesenteric ischemia cases",
+          "Insidious onset with waxing and waning symptoms",
+          "Often associated with hypercoagulable states",
+          "Primary treatment is anticoagulation rather than surgery"
+        ]
+      },
+      {
+        id: "hybrid-approach",
+        name: "Hybrid\nApproach",
+        type: "tertiary-concept",
+        parentId: "treatment",
+        angle: 300,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Combined open and endovascular techniques for mesenteric revascularization",
+        facts: [
+          "Open abdomen with direct SMA access for stenting",
+          "Allows bowel assessment and revascularization in one procedure",
+          "Avoids prosthetic graft infection risk",
+          "Reduces operative time compared to traditional bypass"
+        ]
+      },
+      {
+        id: "medical-management",
+        name: "Medical\nTherapy",
+        type: "tertiary-concept",
+        parentId: "treatment",
+        angle: 0,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Pharmaceutical approaches to mesenteric ischemia management",
+        facts: [
+          "Immediate heparin anticoagulation",
+          "Broad-spectrum antibiotics",
+          "Vasodilators for non-occlusive ischemia (papaverine, nitroglycerin)",
+          "Aggressive atherosclerotic risk factor modification"
+        ]
+      },
+      {
+        id: "protocol",
+        name: "6-Hour\nProtocol",
+        type: "tertiary-concept",
+        parentId: "diagnosis",
+        angle: 240,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Rapid pathway for suspected mesenteric ischemia",
+        facts: [
+          "Early consultation with vascular and general surgery",
+          "Immediate CTA with IV contrast",
+          "Simultaneous resuscitation and anticoagulation",
+          "Door-to-reperfusion target of less than 6 hours"
+        ]
+      }
+    ];
+
+    // ===================================
+    // REUSABLE FUNCTIONS & MAP CREATION
+    // ===================================
+
+    // Main function to initialize the concept map
+    function initializeConceptMap() {
+      const container = document.getElementById('concept-map-container');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Create center concept
+      createConcept(centerConcept, centerX, centerY);
+
+      // Create primary concepts
+      primaryConcepts.forEach(concept => {
+        const angleRad = concept.angle * (Math.PI / 180);
+        const x = centerX + Math.cos(angleRad) * concept.distance;
+        const y = centerY + Math.sin(angleRad) * concept.distance;
+
+        createConcept(concept, x, y);
+        createConnection(centerX, centerY, x, y, concept.connectionType, concept.angle);
+      });
+
+      // Create secondary concepts
+      secondaryConcepts.forEach(concept => {
+        const parent = primaryConcepts.find(p => p.id === concept.parentId);
+        if (parent) {
+          const parentAngleRad = parent.angle * (Math.PI / 180);
+          const parentX = centerX + Math.cos(parentAngleRad) * parent.distance;
+          const parentY = centerY + Math.sin(parentAngleRad) * parent.distance;
+
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+
+      // Create tertiary concepts
+      tertiaryConcepts.forEach(concept => {
+        let parentX, parentY;
+        const parent = secondaryConcepts.find(p => p.id === concept.parentId);
+        
+        if (parent) {
+          const grandParent = primaryConcepts.find(p => p.id === parent.parentId);
+          if (grandParent) {
+            const grandParentAngleRad = grandParent.angle * (Math.PI / 180);
+            const grandParentX = centerX + Math.cos(grandParentAngleRad) * grandParent.distance;
+            const grandParentY = centerY + Math.sin(grandParentAngleRad) * grandParent.distance;
+
+            const parentAngleRad = parent.angle * (Math.PI / 180);
+            parentX = grandParentX + Math.cos(parentAngleRad) * parent.distance;
+            parentY = grandParentY + Math.sin(parentAngleRad) * parent.distance;
+          }
+        } else {
+          // If parent is a primary concept, not a secondary concept
+          const primaryParent = primaryConcepts.find(p => p.id === concept.parentId);
+          if (primaryParent) {
+            const parentAngleRad = primaryParent.angle * (Math.PI / 180);
+            parentX = centerX + Math.cos(parentAngleRad) * primaryParent.distance;
+            parentY = centerY + Math.sin(parentAngleRad) * primaryParent.distance;
+          }
+        }
+
+        if (parentX && parentY) {
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+    }
+
+    // Function to create a concept node
+    function createConcept(concept, x, y) {
+      const conceptElement = document.createElement('div');
+      conceptElement.className = `concept ${concept.type}`;
+      conceptElement.id = concept.id;
+      conceptElement.textContent = concept.name;
+      conceptElement.style.left = `${x - (conceptElement.offsetWidth || 120) / 2}px`;
+      conceptElement.style.top = `${y - (conceptElement.offsetHeight || 120) / 2}px`;
+
+      // Add event listeners
+      conceptElement.addEventListener('mouseover', (e) => {
+        e.stopPropagation(); // Prevent drag while interacting with nodes
+        showTooltip(concept, e);
+      });
+      conceptElement.addEventListener('mouseout', hideTooltip);
+      conceptElement.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent drag while clicking nodes
+        showDetails(concept);
+      });
+
+      // Add touch event handlers
+      conceptElement.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      conceptElement.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+        hideTooltip();
+      });
+
+      document.getElementById('concept-map-container').appendChild(conceptElement);
+
+      // Update position after appending to account for actual size
+      setTimeout(() => {
+        conceptElement.style.left = `${x - conceptElement.offsetWidth / 2}px`;
+        conceptElement.style.top = `${y - conceptElement.offsetHeight / 2}px`;
+      }, 0);
+
+      return conceptElement;
+    }
+
+    // Function to create connection lines between concepts
+    function createConnection(x1, y1, x2, y2, type, angle) {
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const angleRad = Math.atan2(y2 - y1, x2 - x1);
+
+      const connection = document.createElement('div');
+      connection.className = `connection ${type}`;
+      connection.style.width = `${length}px`;
+      connection.style.left = `${x1}px`;
+      connection.style.top = `${y1}px`;
+      connection.style.transform = `rotate(${angleRad}rad)`;
+
+      document.getElementById('concept-map-container').appendChild(connection);
+    }
+
+    // Function to show tooltip on hover
+    function showTooltip(concept, event) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = concept.description;
+      tooltip.style.left = `${event.pageX + 15}px`;
+      tooltip.style.top = `${event.pageY + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    // Function to hide tooltip
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Function to show concept details in side panel
+    function showDetails(concept) {
+      const detailPanel = document.getElementById('detail-panel');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      detailTitle.textContent = concept.name;
+
+      // Create content with description and facts
+      let content = `<p>${concept.description}</p>`;
+
+      // Add facts
+      if (concept.facts && concept.facts.length > 0) {
+        content += `<h2>Key Facts</h2><div class="fact-list">`;
+        concept.facts.forEach(fact => {
+          content += `<div class="fact-item">• ${fact}</div>`;
+        });
+        content += `</div>`;
+      }
+
+      // Add relationships if they exist
+      if (concept.relationships && concept.relationships.length > 0) {
+        content += `<h2>Relationships</h2><div class="relationship-list">`;
+        concept.relationships.forEach(rel => {
+          const allConcepts = [...primaryConcepts, ...secondaryConcepts, ...tertiaryConcepts, centerConcept];
+          const relatedConcept = allConcepts.find(c => c.id === rel.to);
+          if (relatedConcept) {
+            let color;
+            switch (relatedConcept.type) {
+              case "primary-concept":
+                color = "#3f51b5";
+                break;
+              case "secondary-concept":
+                color = "#03a9f4";
+                break;
+              case "tertiary-concept":
+                color = "#4caf50";
+                break;
+              default:
+                color = "#9c27b0";
+                break;
+            }
+            content += `
+              <div class="relationship-item">
+                <div class="relationship-dot" style="background-color: ${color}"></div>
+                <span><b>${relatedConcept.name}</b>: ${rel.description}</span>
+              </div>`;
+          }
+        });
+        content += `</div>`;
+      }
+
+      detailContent.innerHTML = content;
+      detailPanel.style.display = 'block';
+    }
+
+    // Close detail panel
+    document.getElementById('detail-close').addEventListener('click', () => {
+      document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // ===================================
+    // DRAG / PAN FUNCTIONALITY
+    // ===================================
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleDragStart(e) {
+      // Don't drag if clicking on a concept node
+      if (e.target.classList.contains('concept')) return;
+
+      isDragging = true;
+
+      if (e.type === 'mousedown') {
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+
+      document.getElementById('concept-map-container').style.cursor = 'grabbing';
+    }
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      let currentClientX, currentClientY;
+
+      if (e.type === 'mousemove') {
+        currentClientX = e.clientX;
+        currentClientY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchmove') {
+        currentClientX = e.touches[0].clientX;
+        currentClientY = e.touches[0].clientY;
+        e.preventDefault();
+      }
+
+      const deltaX = currentClientX - startX;
+      const deltaY = currentClientY - startY;
+
+      currentX = offsetX + deltaX;
+      currentY = offsetY + deltaY;
+
+      const container = document.getElementById('concept-map-container');
+      container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+    }
+
+    function handleDragEnd() {
+      if (!isDragging) return;
+
+      isDragging = false;
+      offsetX = currentX;
+      offsetY = currentY;
+      document.getElementById('concept-map-container').style.cursor = 'move';
+    }
+
+    // Initialize the concept map when the page loads
+    window.addEventListener('load', () => {
+      initializeConceptMap();
+
+      const container = document.getElementById('concept-map-container');
+      container.addEventListener('mousedown', handleDragStart);
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+
+      container.addEventListener('touchstart', handleDragStart, { passive: false });
+      window.addEventListener('touchmove', handleDrag, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+    });
+
+    // Handle window resize (rebuild map)
+    window.addEventListener('resize', () => {
+      offsetX = 0;
+      offsetY = 0;
+      currentX = 0;
+      currentY = 0;
+      document.getElementById('concept-map-container').innerHTML = '';
+      document.getElementById('concept-map-container').style.transform = '';
+      initializeConceptMap();
+    });
+  </script>
+</body>
+</html>

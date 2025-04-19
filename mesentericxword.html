@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Crossword Puzzle</title>
+    <style>
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(30, 40px); /* Increased box size */
+            background-color: #fff;
+            padding: 10px;
+            margin: auto;
+        }
+
+        .cell {
+            width: 40px; /* Increased box size */
+            height: 40px; /* Increased box size */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px; /* Increased font size */
+            font-weight: bold;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .cell-empty {
+            visibility: hidden;
+        }
+
+        .cell-filled {
+            background-color: #cfc; /* Light green for completed words */
+            cursor: default; /* Change cursor to default to indicate non-interactivity */
+        }
+
+        #top-bar {
+            display: flex;
+            justify-content: flex-start; /* Align to the left */
+            align-items: flex-start; /* Align to the top */
+            position: fixed;
+            top: 10px;
+            left: 10px; /* Bring all the way to the left */
+            width: 200px; /* Very narrow */
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            flex-direction: column;
+        }
+
+        #score {
+            font-size: 24px;
+            text-align: left;
+            margin-bottom: 10px; /* Adjusted margin for spacing */
+        }
+
+        #hints {
+            font-size: 14px; /* Adjusted font size */
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="top-bar">
+        <div id="score">Score: 1000</div>
+        <div id="hints">Click on a letter to see the hints.</div>
+    </div>
+    <div id="grid" style="margin-top: 120px;"></div> <!-- Adjusted margin-top for larger boxes -->
+    <script>
+ const crosswordData = {
+"words": [
+{"word":"POSTPRANDIAL","x":9,"y":15,"vertical":"vertical"},
+{"word":"EMBOLISM","x":10,"y":12,"vertical":"horizontal"},
+{"word":"APHERESIS","x":7,"y":12,"vertical":"vertical"},
+{"word":"PAPAVERINE","x":7,"y":11,"vertical":"horizontal"},
+{"word":"PNEUMATOSIS","x":6,"y":19,"vertical":"vertical"},
+{"word":"PERITONITIS","x":12,"y":11,"vertical":"horizontal"},
+{"word":"CELIAC","x":3,"y":14,"vertical":"vertical"},
+{"word":"ANGIOGRAM","x":14,"y":9,"vertical":"horizontal"},
+{"word":"WATERSHED","x":4,"y":11,"vertical":"horizontal"},
+{"word":"THROMBOSIS","x":18,"y":7,"vertical":"horizontal"}
+],
+"hints": {
+"POSTPRANDIAL": "Type of pain occurring after meals in chronic mesenteric ischemia.",
+"EMBOLISM": "Traveling clot that blocks blood vessels; most common cause of acute mesenteric ischemia.",
+"APHERESIS": "Blood filtration technique used to remove lipoproteins.",
+"PAPAVERINE": "Vasodilatory agent used to treat non-occlusive mesenteric ischemia.",
+"PNEUMATOSIS": "Air in the bowel wall; radiographic sign of intestinal ischemia.",
+"PERITONITIS": "Inflammation of the abdominal cavity lining; may indicate bowel necrosis.",
+"CELIAC": "Artery supplying the foregut including liver and stomach.",
+"ANGIOGRAM": "Gold standard imaging test for mesenteric ischemia.",
+"WATERSHED": "Critical area between vascular territories most vulnerable to low flow.",
+"THROMBOSIS": "Local blood clot formation within a vessel."
+}
+};
+
+
+
+        const gridSize = 30;
+        let grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+        const gridContainer = document.getElementById('grid');
+        let score = 1000;
+        let lockedCells = new Set(); // Use a set to store locked cells
+        let wordHints = crosswordData.hints;
+        let completedWords = new Set(); // Set to store completed words
+
+        function transformPositions(wordPlacements) {
+            let minX = Infinity, minY = Infinity;
+            wordPlacements.forEach(({ x, y }) => {
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+            });
+            // Move the grid within 3 boxes of the top and to the far left
+            return wordPlacements.map(({ word, x, y, vertical }) => ({
+                word, 
+                x: x - minX , 
+                y: y - minY, 
+                vertical 
+            }));
+        }
+
+        function constructGrid(wordPlacements) {
+            const transformedPlacements = transformPositions(wordPlacements);
+            gridContainer.innerHTML = '';
+            gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 40px)`; /* Increased box size */
+            initializeGrid();
+            transformedPlacements.forEach(({ word, x, y, vertical }, index) => {
+                placeWord(word, x, y, vertical === 'vertical', index);
+            });
+            updateGrid();
+        }
+
+        function initializeGrid() {
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.id = `cell-${i}-${j}`;
+                    cell.className = 'cell cell-empty';
+                    gridContainer.appendChild(cell);
+                }
+            }
+        }
+
+        function placeWord(word, x, y, vertical, index) {
+            const length = word.length;
+            for (let i = 0; i < length; i++) {
+                const nx = x + (vertical ? i : 0);
+                const ny = y + (vertical ? 0 : i);
+
+                if (!grid[nx][ny]) {
+                    grid[nx][ny] = {
+                        letter: word[i].toUpperCase(),
+                        choices: generateChoices(word[i]),
+                        state: 'hidden',
+                        display: '?', // Initially set to question mark
+                        vertical: vertical ? { hint: wordHints[word] } : null,
+                        horizontal: !vertical ? { hint: wordHints[word] } : null,
+                        word: word // Store the word it belongs to
+                    };
+                } else {
+                    if (vertical) {
+                        grid[nx][ny].vertical = { hint: wordHints[word] };
+                    } else {
+                        grid[nx][ny].horizontal = { hint: wordHints[word] };
+                    }
+                }
+
+                console.log(`Placing ${word} at (${nx}, ${ny}) with hint: ${wordHints[word]}`); // Log placement
+                const cell = document.getElementById(`cell-${nx}-${ny}`);
+                cell.className = 'cell';
+                cell.addEventListener('click', () => toggleCell(nx, ny));
+                cell.addEventListener('click', () => showHints(nx, ny));
+            }
+        }
+
+        function toggleCell(x, y) {
+            if (lockedCells.has(`${x}-${y}`)) return; // Skip if cell is locked
+
+            const cellData = grid[x][y];
+            if (!cellData) return;
+
+            const currentChoiceIndex = cellData.choices.indexOf(cellData.display);
+            const nextChoiceIndex = (currentChoiceIndex + 1) % cellData.choices.length;
+            cellData.display = cellData.choices[nextChoiceIndex];
+            updateGrid();
+            score -= 5;
+            updateScore();
+            checkAllWordsCompletion();
+        }
+
+        function checkAllWordsCompletion() {
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cellData = grid[i][j];
+                    if (cellData && cellData.state !== 'locked') {
+                        checkCompletion(i, j);
+                    }
+                }
+            }
+        }
+
+        function checkCompletion(x, y) {
+            const cellData = grid[x][y];
+            if (!cellData) return;
+
+            const vertical = cellData.vertical;
+            const word = collectWord(x, y, !!vertical);
+            const isComplete = word.every(cell => cell.display === cell.letter);
+
+            if (isComplete) {
+                const wordKey = word.map(cell => `${cell.x}-${cell.y}`).join('-'); // Unique key for the word
+                if (!completedWords.has(wordKey)) {
+                    word.forEach(cell => {
+                        cell.state = 'locked';
+                        lockedCells.add(`${cell.x}-${cell.y}`); // Add to locked cells set
+                        const domCell = document.getElementById(`cell-${cell.x}-${cell.y}`);
+                        domCell.className = 'cell cell-filled';
+                    });
+                    score += 20 * word.length;
+                    completedWords.add(wordKey); // Mark the word as completed
+                    updateScore();
+                }
+            }
+        }
+
+        function collectWord(x, y, vertical) {
+            let startIndex = vertical ? x : y;
+            let endIndex = startIndex;
+
+            // Find the start index
+            while (startIndex > 0 && grid[vertical ? startIndex - 1 : x][vertical ? y : startIndex - 1] && grid[vertical ? startIndex - 1 : x][vertical ? y : startIndex - 1].letter) {
+                startIndex--;
+            }
+
+            // Find the end index
+            while (endIndex < gridSize - 1 && grid[vertical ? endIndex + 1 : x][vertical ? y : endIndex + 1] && grid[vertical ? endIndex + 1 : x][vertical ? y : endIndex + 1].letter) {
+                endIndex++;
+            }
+
+            const word = [];
+            for (let i = startIndex; i <= endIndex; i++) {
+                const cell = grid[vertical ? i : x][vertical ? y : i];
+                if (cell && cell.letter) { // Check if cell and cell.letter exist
+                    word.push({
+                        ...cell,
+                        x: vertical ? i : x,
+                        y: vertical ? y : i
+                    });
+                }
+            }
+
+            console.log("Collected word:", word); // Log collected word to diagnose the array length
+            return word;
+        }
+
+        function updateGrid() {
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.getElementById(`cell-${i}-${j}`);
+                    const cellData = grid[i][j];
+                    if (cellData) {
+                        cell.textContent = cellData.display;
+                        cell.className = 'cell ' + (cellData.state === 'locked' ? 'cell-filled' : '');
+                    } else {
+                        cell.className = 'cell cell-empty';
+                    }
+                }
+            }
+
+            // Ensure locked cells remain green
+            lockedCells.forEach(pos => {
+                const cell = document.getElementById(`cell-${pos}`);
+                if (cell) {
+                    cell.className = 'cell cell-filled';
+                }
+            });
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = 'Score: ' + score;
+        }
+
+        function generateChoices(letter) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let choices = [letter.toUpperCase()];
+            while (choices.length < 3) {
+                const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+                if (!choices.includes(randomLetter) && randomLetter !== letter.toUpperCase()) {
+                    choices.push(randomLetter);
+                }
+            }
+            return choices.sort(() => Math.random() - 0.5);
+        }
+
+        function showHints(x, y) {
+            const cellData = grid[x][y];
+            if (!cellData) return; // Exit if there's no data for the cell.
+
+            const hintsElement = document.getElementById('hints');
+            hintsElement.innerHTML = ''; // Clear previous hints
+
+            // Display vertical hint if available
+            if (cellData.vertical && cellData.vertical.hint) {
+                let verticalHintElement = document.createElement('div');
+                verticalHintElement.textContent = `${cellData.vertical.hint} (Vertical)`;
+                hintsElement.appendChild(verticalHintElement);
+            }
+
+            // Display horizontal hint if available
+            if (cellData.horizontal && cellData.horizontal.hint) {
+                let horizontalHintElement = document.createElement('div');
+                horizontalHintElement.textContent = `${cellData.horizontal.hint} (Horizontal)`;
+                hintsElement.appendChild(horizontalHintElement);
+            }
+        }
+
+        constructGrid(crosswordData.words);
+    </script>
+</body>
+</html>
