@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Add Viewport Meta Tag for responsiveness -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medication Calendar Generator</title>
+  <style>
+    /* --- Base Styles --- */
+    body {
+        font-family: sans-serif;
+        line-height: 1.5;
+        padding: 10px; /* Add base padding */
+    }
+    h1, h3 {
+        margin-bottom: 0.5em;
+    }
+    label {
+        display: block;
+        margin-top: 8px;
+    }
+    /* Inline labels for checkboxes etc. */
+    .input-group label, .checkbox-group label, .radio-group label {
+        display: inline-block;
+        margin-right: 5px;
+        font-weight: normal; /* Keep these normal */
+    }
+    /* Input and Select Styling */
+    input[type="text"], input[type="time"], select {
+      padding: 8px; /* Larger padding for touch */
+      margin-left: 5px;
+      margin-bottom: 5px; /* Add bottom margin */
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 1em;
+      box-sizing: border-box; /* Include padding/border in width */
+      max-width: 100%; /* Prevent overflow */
+    }
+    input[type="time"] { width: 120px; } /* Fixed width is okay for time */
+    input[type="text"] { width: 200px; max-width: calc(100% - 10px); } /* Allow text to grow */
+    select { width: 130px; background-color: #fff; } /* Slightly wider select */
+
+    /* Timezone Section */
+    .timezone-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f8f8f8;
+    }
+    .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    .radio-option {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Layout Sections */
+    .section {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fdfdfd;
+    }
+    .med-timeslot {
+        margin-bottom: 15px;
+        padding-left: 15px; /* Slightly reduce padding */
+        border-left: 2px solid #eee;
+        margin-left: 5px;
+        padding-bottom: 10px;
+        margin-top: 8px;
+    }
+    /* Labels within timeslots */
+    .med-timeslot label {
+        display: block;
+        margin-bottom: 5px; /* Increased space */
+        font-weight: normal; /* Labels inside slots are normal weight */
+    }
+    .med-timeslot .input-label { /* The span acting as label */
+        display: inline-block;
+        min-width: 80px;
+        margin-bottom: 3px; /* Space when stacked */
+    }
+    /* Inputs inside timeslots */
+    .med-timeslot input[type="time"],
+    .med-timeslot input[type="text"],
+    .med-timeslot select {
+        margin-left: 0; /* Align left */
+        margin-bottom: 8px; /* Space below input */
+    }
+    /* Checkbox groups */
+    .checkbox-group {
+        margin-top: 5px;
+        margin-left: 0px; /* Align with other inputs */
+        padding-bottom: 5px;
+    }
+     .checkbox-group label {
+         margin-right: 15px; /* More space between checkboxes */
+     }
+
+    /* Preview Area */
+    .preview { margin-top: 20px; padding: 10px; border: 1px dashed #999; background: #f0f0f0; border-radius: 5px; min-height: 50px; }
+    .preview h3 { margin-top: 0; }
+    .preview ul { padding-left: 20px; margin-top: 5px; }
+    .preview li { margin-bottom: 3px; }
+
+    /* Buttons and Links */
+    button {
+      padding: 12px 18px; /* Larger buttons */
+      margin-top: 15px;
+      margin-right: 10px;
+      background-color: #007bff; color: white;
+      border: none; border-radius: 4px; cursor: pointer;
+      font-size: 1em; vertical-align: middle;
+    }
+    button:hover { background-color: #0056b3; }
+    button#generateButton { background-color: #28a745; }
+    button#generateButton:hover { background-color: #218838; }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    #downloadLink {
+       display: none; /* Starts hidden */
+       margin-top: 15px; margin-left: 5px; font-weight: bold; vertical-align: middle;
+       padding: 8px 10px; /* Larger padding */
+       border: 1px solid #ccc; background-color: #eee; border-radius: 4px; text-decoration: none; color: #333;
+    }
+     #downloadLink:hover { background-color: #ddd; }
+
+    /* Messages */
+    #errorMessages, #infoMessages { border: 1px solid; padding: 10px; margin-top: 10px; border-radius: 4px; }
+    #errorMessages { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+    #infoMessages { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+    #errorMessages ul, #infoMessages ul { padding-left: 20px; margin-bottom: 0; }
+
+    /* Disabled Look */
+    input:disabled, select:disabled { background-color: #eee; cursor: not-allowed; opacity: 0.7; }
+    .disabled-look { opacity: 0.6; }
+    .disabled-look input, .disabled-look select, .disabled-look .checkbox-group label { pointer-events: none; } /* Disable interactions */
+    .disabled-look .med-timeslot { /* Also visually disable the container */
+         opacity: 0.6;
+    }
+
+    /* Notes */
+    .note { font-size: 0.9em; color: #555; margin-top: 5px; display: block; } /* Ensure note is block */
+
+    /* --- Tooltip CSS --- */
+    .tooltip-container { display: inline-block; position: relative; vertical-align: middle; margin-left: 5px; }
+    .tooltip-icon { display: inline-block; width: 18px; height: 18px; background-color: #aaa; color: white; border-radius: 50%; text-align: center; font-size: 13px; line-height: 18px; cursor: help; font-weight: bold; }
+    .tooltip-text { visibility: hidden; width: 250px; background-color: #555; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -125px; opacity: 0; transition: opacity 0.3s; font-size: 0.85em; font-weight: normal; }
+    .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+
+    /* --- Responsive Styles --- */
+    @media (max-width: 768px) {
+        body {
+            padding: 5px;
+            font-size: 15px;
+        }
+        h1 { font-size: 1.6em; }
+        h3 { font-size: 1.2em; }
+
+        /* Make inputs take more width */
+        input[type="text"], input[type="time"], select {
+            width: calc(100% - 10px); /* Almost full width */
+            margin-left: 0;
+        }
+        input[type="time"] { width: 130px; } /* Can keep time slightly fixed */
+        select { width: calc(100% - 10px); }
+
+        /* Stack labels and inputs within timeslots */
+        .med-timeslot label {
+            display: block; /* Ensure labels are block */
+        }
+        .med-timeslot .input-label {
+            min-width: auto; /* Remove min-width */
+            margin-bottom: 4px;
+            display: block; /* Make span label block */
+            font-weight: bold; /* Make labels bolder on mobile */
+        }
+        .med-timeslot input[type="time"],
+        .med-timeslot input[type="text"],
+        .med-timeslot select {
+             width: calc(100% - 10px); /* Ensure inputs inside take full width */
+             margin-left: 0;
+        }
+        .med-timeslot {
+            padding-left: 10px;
+        }
+        .checkbox-group label {
+            display: block; /* Stack checkboxes */
+            margin-bottom: 8px;
+            margin-right: 0;
+        }
+
+        /* Stack buttons */
+        button, .tooltip-container {
+            display: block;
+            width: calc(100% - 10px);
+            margin-right: 0;
+            margin-left: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #downloadLink {
+            width: auto;
+            display: inline-block;
+        }
+        .tooltip-container {
+             margin-left: 0;
+        }
+        .tooltip-icon {
+             margin-left: 8px;
+        }
+         .tooltip-text {
+             left: 10px;
+             margin-left: 0;
+             width: calc(100vw - 40px);
+             max-width: 300px;
+             bottom: 115%;
+         }
+    }
+     @media (max-width: 400px) {
+          body { font-size: 14px; }
+          h1 { font-size: 1.4em; }
+          button, #downloadLink { padding: 10px 15px; }
+          input[type="text"], input[type="time"], select { padding: 6px; }
+     }
+
+  </style>
+</head>
+<body>
+  <!-- HTML Structure with Time Zone Selection Added -->
+  <h1>Medication Calendar Generator</h1>
+  <p>Configure your reminders below, click "Preview Schedule", then "Generate Calendar Setter" to download.</p>
+  <p class="note"><strong>Note on Colors:</strong> We attempt to set event colors (Red=Daily, Blue=Insulin, Green=Weekly), but support depends on your calendar app (Apple Calendar works well; Google/Outlook may vary).</p>
+  <div id="errorMessages" style="display: none;"></div>
+  <div id="infoMessages" style="display: none;"></div>
+
+  <form id="medForm">
+    <!-- Time Zone Selection Section -->
+    <div class="timezone-section">
+      <h3>Time Zone Selection</h3>
+      <p>Select your time zone for correct calendar event timing:</p>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" name="timezone" id="eastern" value="America/New_York" checked>
+          <label for="eastern">Eastern Time (ET)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="timezone" id="central" value="America/Chicago">
+          <label for="central">Central Time (CT)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="timezone" id="mountain" value="America/Denver">
+          <label for="mountain">Mountain Time (MT)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" name="timezone" id="pacific" value="America/Los_Angeles">
+          <label for="pacific">Pacific Time (PT)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Medications Section (RED: #FF0000) -->
+    <div class="section">
+      <h3>Daily Medications (Color: Red)</h3>
+       <p class="note">Medication names are optional.</p>
+      <!-- AM -->
+      <div>
+        <label>
+          <input type="checkbox" name="amEnable" id="amEnable" checked data-controls="amTime amMeds">
+          Enable AM Slot (Default: 08:00)
+        </label>
+        <div class="med-timeslot">
+            <label for="amTime"><span class="input-label">Time:</span>
+                <input type="time" name="amTime" id="amTime" value="08:00">
+            </label>
+            <label for="amMeds"><span class="input-label">Name(s):</span>
+                <input type="text" name="amMeds" id="amMeds" placeholder="(Optional)">
+            </label>
+        </div>
+      </div>
+       <!-- Noon -->
+       <div>
+        <label>
+          <input type="checkbox" name="noonEnable" id="noonEnable" checked data-controls="noonTime noonMeds">
+           Enable Noon Slot (Default: 12:00)
+        </label>
+        <div class="med-timeslot">
+            <label for="noonTime"><span class="input-label">Time:</span>
+                <input type="time" name="noonTime" id="noonTime" value="12:00">
+            </label>
+            <label for="noonMeds"><span class="input-label">Name(s):</span>
+                <input type="text" name="noonMeds" id="noonMeds" placeholder="(Optional)">
+            </label>
+        </div>
+      </div>
+       <!-- Evening -->
+       <div>
+        <label>
+          <input type="checkbox" name="eveningEnable" id="eveningEnable" checked data-controls="eveningTime eveningMeds">
+          Enable Evening Slot (Default: 18:00)
+        </label>
+        <div class="med-timeslot">
+            <label for="eveningTime"><span class="input-label">Time:</span>
+                <input type="time" name="eveningTime" id="eveningTime" value="18:00">
+            </label>
+            <label for="eveningMeds"><span class="input-label">Name(s):</span>
+                <input type="text" name="eveningMeds" id="eveningMeds" placeholder="(Optional)">
+            </label>
+        </div>
+      </div>
+       <!-- Bedtime -->
+       <div>
+        <label>
+          <input type="checkbox" name="bedEnable" id="bedEnable" checked data-controls="bedTime bedMeds">
+           Enable Bedtime Slot (Default: 21:00)
+        </label>
+        <div class="med-timeslot">
+            <label for="bedTime"><span class="input-label">Time:</span>
+                <input type="time" name="bedTime" id="bedTime" value="21:00">
+            </label>
+            <label for="bedMeds"><span class="input-label">Name(s):</span>
+                <input type="text" name="bedMeds" id="bedMeds" placeholder="(Optional)">
+            </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insulins Section (BLUE: #0000FF) -->
+    <div class="section">
+      <h3>Insulins (Color: Blue)</h3>
+       <p class="note">Select type(s) and provide name/notes. Defaults are 15 min after med times.</p>
+      <!-- Insulin Morning -->
+      <div class="med-timeslot">
+        <label for="insulinMorning"><span class="input-label">Morning:</span>
+            <input type="time" name="insulinMorning" id="insulinMorning" value="08:15">
+        </label>
+         <div class="checkbox-group">
+            <label><input type="checkbox" name="insulinMorningShort" id="insulinMorningShort"> Short-acting</label>
+            <label><input type="checkbox" name="insulinMorningLong" id="insulinMorningLong"> Long-acting</label>
+        </div>
+        <label for="insulinMorningComment"><span class="input-label">Name/Notes:</span>
+            <input type="text" name="insulinMorningComment" id="insulinMorningComment" placeholder="e.g., Novolog 5 units">
+        </label>
+      </div>
+      <!-- Insulin Lunch -->
+      <div class="med-timeslot">
+        <label for="insulinLunch"><span class="input-label">Lunch:</span>
+            <input type="time" name="insulinLunch" id="insulinLunch" value="12:15">
+        </label>
+         <div class="checkbox-group">
+            <label><input type="checkbox" name="insulinLunchShort" id="insulinLunchShort"> Short-acting</label>
+            <label><input type="checkbox" name="insulinLunchLong" id="insulinLunchLong"> Long-acting</label>
+        </div>
+        <label for="insulinLunchComment"><span class="input-label">Name/Notes:</span>
+            <input type="text" name="insulinLunchComment" id="insulinLunchComment" placeholder="e.g., Humalog Sliding Scale">
+        </label>
+      </div>
+      <!-- Insulin Dinner -->
+      <div class="med-timeslot">
+        <label for="insulinDinner"><span class="input-label">Dinner:</span>
+            <input type="time" name="insulinDinner" id="insulinDinner" value="18:15">
+        </label>
+         <div class="checkbox-group">
+            <label><input type="checkbox" name="insulinDinnerShort" id="insulinDinnerShort"> Short-acting</label>
+            <label><input type="checkbox" name="insulinDinnerLong" id="insulinDinnerLong"> Long-acting</label>
+        </div>
+        <label for="insulinDinnerComment"><span class="input-label">Name/Notes:</span>
+            <input type="text" name="insulinDinnerComment" id="insulinDinnerComment" placeholder="Insulin name / notes">
+        </label>
+      </div>
+       <!-- Insulin Bedtime -->
+       <div class="med-timeslot">
+        <label for="insulinBed"><span class="input-label">Bedtime:</span>
+            <input type="time" name="insulinBed" id="insulinBed" value="21:15">
+        </label>
+         <div class="checkbox-group">
+            <label><input type="checkbox" name="insulinBedShort" id="insulinBedShort"> Short-acting</label>
+            <label><input type="checkbox" name="insulinBedLong" id="insulinBedLong"> Long-acting</label>
+        </div>
+        <label for="insulinBedComment"><span class="input-label">Name/Notes:</span>
+            <input type="text" name="insulinBedComment" id="insulinBedComment" placeholder="e.g., Lantus 20 units">
+        </label>
+      </div>
+    </div>
+
+    <!-- Weekly Medication Section (GREEN: #008000) -->
+    <div class="section">
+      <h3>Weekly Medication (Color: Green)</h3>
+       <div>
+        <label>
+          <input type="checkbox" name="weeklyEnable" id="weeklyEnable" checked data-controls="weeklyDay weeklyTime weeklyMed">
+           Enable Weekly Slot (Default: Wednesday 08:30) <!-- Time changed -->
+        </label>
+        <div class="med-timeslot">
+            <label for="weeklyDay"><span class="input-label">Day:</span>
+                <select name="weeklyDay" id="weeklyDay">
+                  <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+                  <option selected>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+                </select>
+            </label>
+            <label for="weeklyTime"><span class="input-label">Time:</span>
+                <input type="time" name="weeklyTime" id="weeklyTime" value="08:30"> <!-- Value Changed -->
+            </label>
+            <label for="weeklyMed"><span class="input-label">Name:</span>
+                <input type="text" name="weeklyMed" id="weeklyMed" placeholder="(Optional)">
+            </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons & Download Link Area -->
+    <div style="margin-top: 20px;">
+        <button type="button" id="previewButton">Preview Schedule</button>
+        <button type="button" id="generateButton" disabled>Generate Calendar Setter</button> <!-- Text Changed -->
+        <!-- Tooltip Container wraps the download link and icon -->
+        <div class="tooltip-container">
+            <a id="downloadLink" download="medication_reminders.ics">Download Calendar Setter</a> <!-- Text Changed -->
+            <span class="tooltip-icon">?</span>
+            <span class="tooltip-text">Clicking 'Download Calendar Setter' saves a file (.ics). Opening this file on your phone or computer should prompt you to add these reminders to your default calendar app.</span>
+        </div>
+    </div>
+
+  </form>
+
+  <!-- Preview Area -->
+  <div class="preview">
+    <h3>Preview</h3>
+    <ul id="previewList"><li>Click "Preview Schedule" to see events here.</li></ul>
+  </div>
+
+
+  <script defer>
+    // --- JAVASCRIPT WITH TIME ZONE FIXES ---
+const form = document.getElementById('medForm');
+const previewList = document.getElementById('previewList');
+const downloadLink = document.getElementById('downloadLink');
+const errorMessagesDiv = document.getElementById('errorMessages');
+const infoMessagesDiv = document.getElementById('infoMessages');
+const previewButton = document.getElementById('previewButton');
+const generateButton = document.getElementById('generateButton');
+
+let currentEvents = [];
+let currentErrors = [];
+let currentBlobUrl = null;
+
+// --- Define Colors ---
+const dailyMedColor = '#FF0000'; // Red
+const insulinColor = '#0000FF';   // Blue
+const weeklyMedColor = '#008000'; // Green
+
+// --- Helper Function to Get Selected Time Zone ---
+const getSelectedTimeZone = () => {
+    const timeZoneRadios = document.getElementsByName('timezone');
+    for (const radio of timeZoneRadios) {
+        if (radio.checked) {
+            return radio.value;
+        }
+    }
+    return 'America/New_York'; // Default to Eastern Time
+};
+
+// --- Helper Function to Format Date/Time for ICS ---
+const formatICSDate = (date) => {
+    if (!date || isNaN(date.getTime())) {
+        console.error("Invalid date passed to formatICSDate:", date);
+        throw new Error("Invalid date object provided for ICS formatting.");
+    }
+    
+    // Format as YYYYMMDDTHHMMSSZ - ensuring proper UTC conversion
+    const pad = (num) => (num < 10 ? '0' : '') + num;
+    
+    return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T` +
+           `${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
+};
+
+// --- Helper Function to Create VEVENT String (Now includes time zone) ---
+const createVEvent = (uid, dtStamp, dtStart, freq, title, description, colorHex = null) => {
+    if (!uid || !dtStamp || !dtStart || !freq || !title) {
+         console.error("Missing required VEVENT parameters:", {uid, dtStamp, dtStart, freq, title});
+         throw new Error("Missing required parameters to create VEVENT.");
+    }
+
+    // Get selected time zone
+    const timeZone = getSelectedTimeZone();
+
+    let vevent = `BEGIN:VEVENT\r\n`;
+    vevent += `UID:${uid}\r\n`;
+    vevent += `DTSTAMP:${dtStamp}\r\n`;
+    
+    // Fix: Use proper DTSTART format without VALUE=DATE-TIME
+    vevent += `DTSTART:${dtStart}\r\n`;
+    
+    // Include proper RRULE
+    vevent += `RRULE:${freq}\r\n`;
+    
+    vevent += `DURATION:PT15M\r\n`; // Set duration to 15 minutes
+    const escapeICS = (str) => str.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;');
+    vevent += `SUMMARY:${escapeICS(title)}\r\n`;
+    vevent += `DESCRIPTION:${escapeICS(description.replace(/\n/g, '\\n'))}\r\n`;
+
+    // Add Apple Color Property if provided
+    if (colorHex) {
+        vevent += `X-APPLE-CALENDAR-COLOR:${colorHex}\r\n`;
+    }
+
+    vevent += `BEGIN:VALARM\r\n`;
+    vevent += `ACTION:DISPLAY\r\n`;
+    vevent += `DESCRIPTION:Reminder: ${escapeICS(title)}\r\n`;
+    vevent += `TRIGGER:-PT5M\r\n`; // 5 minutes before DTSTART
+    vevent += `END:VALARM\r\n`;
+    vevent += `END:VEVENT`;
+    return vevent;
+};
+
+// --- Main Function to Process Form and Generate Events/Errors ---
+const processForm = () => {
+    currentEvents = [];
+    currentErrors = [];
+    const f = form.elements;
+    const now = new Date();
+    const dtStamp = formatICSDate(now);
+
+    // --- Daily Medications ---
+    const processDailySlot = (enableCb, timeInput, nameInput, timeLabel) => {
+        if (enableCb.checked) {
+            const time = timeInput.value;
+            const medName = nameInput.value.trim();
+            if (!time) { currentErrors.push(`Missing time for enabled ${timeLabel} slot.`); return; }
+            const title = medName ? `${timeLabel} Meds: ${medName}` : `${timeLabel} Medication Reminder`;
+            const description = `Reminder to take ${medName || timeLabel.toLowerCase() + ' medication'}.\nGenerated by Medication Calendar Generator.`;
+            try {
+                const [hour, minute] = time.split(":");
+                if (isNaN(parseInt(hour)) || isNaN(parseInt(minute)) || hour < 0 || hour > 23 || minute < 0 || minute > 59) throw new Error("Invalid time format");
+                
+                // Create a local date first
+                const startDate = new Date(
+                    now.getFullYear(), 
+                    now.getMonth(), 
+                    now.getDate(), 
+                    parseInt(hour), 
+                    parseInt(minute)
+                );
+                
+                if (isNaN(startDate.getTime())) throw new Error("Invalid date created");
+                const dtStart = formatICSDate(startDate);
+                const uid = dtStamp + "-" + Math.random().toString(36).substr(2, 9) + "-daily-" + timeLabel.toLowerCase();
+                currentEvents.push({
+                    vevent: createVEvent(uid, dtStamp, dtStart, 'FREQ=DAILY', title, description, dailyMedColor),
+                    previewText: `${title} at ${time} (DAILY)`
+                 });
+            } catch (e) { console.error(`Error processing ${timeLabel} Meds:`, e); currentErrors.push(`Invalid time/date for ${timeLabel} Meds ("${time}").`); }
+        }
+    };
+    processDailySlot(f.amEnable, f.amTime, f.amMeds, 'AM');
+    processDailySlot(f.noonEnable, f.noonTime, f.noonMeds, 'Noon');
+    processDailySlot(f.eveningEnable, f.eveningTime, f.eveningMeds, 'Evening');
+    processDailySlot(f.bedEnable, f.bedTime, f.bedMeds, 'Bedtime');
+
+    // --- Insulins ---
+     const processInsulinSlot = (timeInput, shortCb, longCb, commentInput, timeLabel) => {
+        const isShort = shortCb.checked;
+        const isLong = longCb.checked;
+        const comment = commentInput.value.trim();
+        const time = timeInput.value;
+        if ((isShort || isLong) && comment) {
+             if (!time) { currentErrors.push(`Missing time for ${timeLabel} Insulin: ${comment}.`); return; }
+            let typeStr = (isShort && isLong) ? "Short & Long Acting" : (isShort ? "Short-Acting" : "Long-Acting");
+            const title = `${typeStr} Insulin (${timeLabel}): ${comment}`;
+            const description = `Reminder for ${typeStr} Insulin: ${comment}.\n(${timeLabel})\nGenerated by Medication Calendar Generator.`;
+             try {
+                const [hour, minute] = time.split(":");
+                 if (isNaN(parseInt(hour)) || isNaN(parseInt(minute)) || hour < 0 || hour > 23 || minute < 0 || minute > 59) throw new Error("Invalid time format");
+                
+                // Create a local date
+                const startDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                    parseInt(hour),
+                    parseInt(minute)
+                );
+                
+                 if (isNaN(startDate.getTime())) throw new Error("Invalid date created");
+                const dtStart = formatICSDate(startDate);
+                const uid = dtStamp + "-" + Math.random().toString(36).substr(2, 9) + "-insulin-" + timeLabel.toLowerCase();
+                 currentEvents.push({
+                     vevent: createVEvent(uid, dtStamp, dtStart, 'FREQ=DAILY', title, description, insulinColor),
+                     previewText: `${title} at ${time} (DAILY)`
+                 });
+            } catch (e) { console.error(`Error processing ${timeLabel} Insulin:`, e); currentErrors.push(`Invalid time/date for ${timeLabel} Insulin ("${time}").`); }
+        } else if ((isShort || isLong) && !comment) { currentErrors.push(`Missing name/notes for checked ${timeLabel} Insulin type(s).`); }
+    };
+    processInsulinSlot(f.insulinMorning, f.insulinMorningShort, f.insulinMorningLong, f.insulinMorningComment, 'Morning');
+    processInsulinSlot(f.insulinLunch, f.insulinLunchShort, f.insulinLunchLong, f.insulinLunchComment, 'Lunch');
+    processInsulinSlot(f.insulinDinner, f.insulinDinnerShort, f.insulinDinnerLong, f.insulinDinnerComment, 'Dinner');
+    processInsulinSlot(f.insulinBed, f.insulinBedShort, f.insulinBedLong, f.insulinBedComment, 'Bedtime');
+
+    // --- Weekly Med ---
+    if (f.weeklyEnable.checked) {
+        const time = f.weeklyTime.value;
+        const medName = f.weeklyMed.value.trim();
+         if (!time) { currentErrors.push(`Missing time for enabled Weekly slot.`); }
+         else {
+             const title = medName ? `Weekly Med: ${medName}` : `Weekly Medication Reminder`;
+            const description = `Reminder to take ${medName || 'weekly medication'}.\nGenerated by Medication Calendar Generator.`;
+            const weeklyDay = f.weeklyDay.value.toUpperCase().slice(0, 2);
+            const freq = `FREQ=WEEKLY;BYDAY=${weeklyDay}`;
+             try {
+                const [hour, minute] = time.split(":");
+                 if (isNaN(parseInt(hour)) || isNaN(parseInt(minute)) || hour < 0 || hour > 23 || minute < 0 || minute > 59) throw new Error("Invalid time format");
+                
+                // Create a local date for the current day
+                const startDate = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate(),
+                    parseInt(hour),
+                    parseInt(minute)
+                );
+                
+                 if (isNaN(startDate.getTime())) throw new Error("Invalid date created");
+                
+                // Adjust to the target day of the week (in local time)
+                const currentDayOfWeek = startDate.getDay();
+                const targetDayOfWeek = ['SU','MO','TU','WE','TH','FR','SA'].indexOf(weeklyDay);
+                if (targetDayOfWeek === -1) throw new Error("Invalid weekly day");
+                let daysToAdd = targetDayOfWeek - currentDayOfWeek;
+                if (daysToAdd < 0) { daysToAdd += 7; }
+                if (daysToAdd > 0) { startDate.setDate(startDate.getDate() + daysToAdd); }
+                 if (isNaN(startDate.getTime())) throw new Error("Invalid date after weekly adjustment");
+                
+                const dtStart = formatICSDate(startDate);
+                const uid = dtStamp + "-" + Math.random().toString(36).substr(2, 9) + "-weekly-" + weeklyDay;
+                 currentEvents.push({
+                     vevent: createVEvent(uid, dtStamp, dtStart, freq, title, description, weeklyMedColor),
+                     previewText: `${title} at ${time} (${f.weeklyDay.value}s)`
+                });
+            } catch (e) { console.error(`Error processing Weekly Med:`, e); currentErrors.push(`Invalid time/date for Weekly Med ("${time}").`); }
+        }
+    }
+};
+
+// --- Function to Update UI (Preview, Errors, Buttons) ---
+const updateUI = () => {
+    if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+    previewList.innerHTML = '';
+    if (currentEvents.length > 0) { currentEvents.forEach(e => { const li = document.createElement('li'); li.textContent = e.previewText; previewList.appendChild(li); }); }
+    else if (currentErrors.length === 0) { previewList.innerHTML = '<li>No events generated based on current settings.</li>'; }
+    else { previewList.innerHTML = '<li>Preview unavailable due to errors.</li>'; }
+    errorMessagesDiv.innerHTML = ''; errorMessagesDiv.style.display = 'none';
+    if (currentErrors.length > 0) { errorMessagesDiv.innerHTML = '<h3>Please fix the following issues:</h3><ul>' + currentErrors.map(e => `<li>${e}</li>`).join('') + '</ul>'; errorMessagesDiv.style.display = 'block'; }
+    infoMessagesDiv.innerHTML = ''; infoMessagesDiv.style.display = 'none';
+    generateButton.disabled = currentErrors.length > 0 || currentEvents.length === 0;
+    downloadLink.style.display = 'none'; downloadLink.removeAttribute('href'); downloadLink.textContent = 'Download Calendar Setter';
+};
+
+// --- Display Time Zone Info in Messages ---
+const showTimeZoneInfo = () => {
+    const timeZone = getSelectedTimeZone();
+    let timeZoneName = "Eastern Time";
+    
+    switch(timeZone) {
+        case "America/New_York": timeZoneName = "Eastern Time"; break;
+        case "America/Chicago": timeZoneName = "Central Time"; break;
+        case "America/Denver": timeZoneName = "Mountain Time"; break;
+        case "America/Los_Angeles": timeZoneName = "Pacific Time"; break;
+    }
+    
+    infoMessagesDiv.innerHTML = `<p>Using ${timeZoneName} zone for calendar events.</p>`;
+    infoMessagesDiv.style.display = 'block';
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        infoMessagesDiv.style.display = 'none';
+    }, 3000);
+};
+
+// --- Event Listener for Time Zone Selection ---
+document.querySelectorAll('input[name="timezone"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        showTimeZoneInfo();
+        // Reset preview when time zone changes
+        previewList.innerHTML = '<li>Time zone changed. Click "Preview Schedule" again.</li>';
+        generateButton.disabled = true;
+        downloadLink.style.display = 'none';
+    });
+});
+
+// --- Event Listener for Preview Button ---
+previewButton.addEventListener('click', () => {
+    processForm(); updateUI();
+     if (currentErrors.length === 0 && currentEvents.length > 0) { 
+         const timeZone = getSelectedTimeZone();
+         let timeZoneName = "Eastern Time";
+         
+         switch(timeZone) {
+            case "America/New_York": timeZoneName = "Eastern Time"; break;
+            case "America/Chicago": timeZoneName = "Central Time"; break;
+            case "America/Denver": timeZoneName = "Mountain Time"; break;
+            case "America/Los_Angeles": timeZoneName = "Pacific Time"; break;
+         }
+         
+         infoMessagesDiv.innerHTML = `<p>Preview updated (${currentEvents.length} event series) using ${timeZoneName}. Looks good? Click "Generate Calendar Setter".</p>`;
+         infoMessagesDiv.style.display = 'block';
+     }
+     else if (currentErrors.length === 0 && currentEvents.length === 0) { infoMessagesDiv.innerHTML = `<p>No events to generate based on the current settings.</p>`; infoMessagesDiv.style.display = 'block'; }
+});
+
+// --- Event Listener for Generate Button ---
+generateButton.addEventListener('click', () => {
+    processForm(); updateUI(); // Re-process and update UI
+    if (currentErrors.length === 0 && currentEvents.length > 0) {
+        // Create iCalendar content with proper structure for better compatibility
+        const icsContent = `BEGIN:VCALENDAR\r\nPRODID:-//MedicationCalendarGenerator//EN\r\nVERSION:2.0\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n${currentEvents.map(e => e.vevent).join("\r\n")}\r\nEND:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); } // Clean up previous before creating new
+        currentBlobUrl = URL.createObjectURL(blob);
+        downloadLink.href = currentBlobUrl;
+        downloadLink.textContent = `Download Calendar Setter (${currentEvents.length} event series)`;
+        downloadLink.style.display = 'inline-block'; // Make link visible
+        
+        const timeZone = getSelectedTimeZone();
+        let timeZoneName = "Eastern Time";
+         
+        switch(timeZone) {
+           case "America/New_York": timeZoneName = "Eastern Time"; break;
+           case "America/Chicago": timeZoneName = "Central Time"; break;
+           case "America/Denver": timeZoneName = "Mountain Time"; break;
+           case "America/Los_Angeles": timeZoneName = "Pacific Time"; break;
+        }
+        
+        infoMessagesDiv.innerHTML = `<p>Success! Click the link above to download the Calendar Setter file (${timeZoneName}).</p><p class='note'>Remember: Review your calendar after importing. Colors may vary by app.</p>`;
+        infoMessagesDiv.style.display = 'block';
+    } else {
+         errorMessagesDiv.innerHTML = 'Cannot generate file due to errors or no events selected.'; errorMessagesDiv.style.display = 'block';
+         downloadLink.style.display = 'none'; downloadLink.removeAttribute('href');
+    }
+});
+
+// --- Enable/Disable Inputs Based on Checkboxes ---
+const checkboxes = form.querySelectorAll('input[type="checkbox"][data-controls]');
+checkboxes.forEach(cb => {
+    const controlledElementIds = cb.dataset.controls.split(' ');
+    const controlledElements = controlledElementIds.map(id => document.getElementById(id)).filter(el => el);
+    // Find the parent container specific to this script's structure
+    const parentContainer = cb.closest('div').querySelector('.med-timeslot'); // Target .med-timeslot
+
+    const updateDisabledState = () => {
+         controlledElements.forEach(el => { el.disabled = !cb.checked; });
+          // Apply disabled look correctly
+          if (parentContainer) {
+              parentContainer.classList.toggle('disabled-look', !cb.checked);
+          } else {
+             // Fallback if structure differs (less likely here)
+             cb.closest('div').classList.toggle('disabled-look', !cb.checked);
+          }
+          // Invalidate preview on change
+          generateButton.disabled = true; downloadLink.style.display = 'none'; infoMessagesDiv.style.display = 'none';
+          previewList.innerHTML = '<li>Settings changed. Click "Preview Schedule" again.</li>';
+    };
+    cb.addEventListener('change', updateDisabledState); updateDisabledState(); // Initial state
+});
+
+// --- Reset state on other input changes ---
+form.querySelectorAll('input, select').forEach(input => {
+    input.addEventListener('change', () => {
+        // Invalidate only if it's not one of the controlling checkboxes handled above
+        if (!(input.type === 'checkbox' && input.dataset.controls)) {
+            generateButton.disabled = true; downloadLink.style.display = 'none'; infoMessagesDiv.style.display = 'none';
+            previewList.innerHTML = '<li>Settings changed. Click "Preview Schedule" again.</li>';
+        }
+    });
+     // Add listener for 'input' event on text fields for immediate feedback
+    if(input.type === 'text') {
+         input.addEventListener('input', () => {
+            generateButton.disabled = true; downloadLink.style.display = 'none'; infoMessagesDiv.style.display = 'none';
+            previewList.innerHTML = '<li>Settings changed. Click "Preview Schedule" again.</li>';
+         });
+    }
+});
+
+// --- Show initial time zone info ---
+showTimeZoneInfo();
+
+// --- Cleanup Blob URL on Page Unload ---
+window.addEventListener('beforeunload', () => { if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); } });
+  </script>
+</body>
+</html>
