@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chronic Pancreatitis Pain Concept Map</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      overflow: hidden;
+      touch-action: none; /* Prevents browser handling of touch events */
+    }
+
+    #concept-map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      cursor: move;
+    }
+
+    .concept {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .center-concept {
+      background-color: #9c27b0;
+      width: 160px;
+      height: 160px;
+      font-size: 18px;
+      z-index: 20;
+    }
+
+    .primary-concept {
+      background-color: #3f51b5;
+      width: 120px;
+      height: 120px;
+      font-size: 14px;
+    }
+
+    .secondary-concept {
+      background-color: #03a9f4;
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+    }
+
+    .tertiary-concept {
+      background-color: #4caf50;
+      width: 70px;
+      height: 70px;
+      font-size: 11px;
+    }
+
+    .concept:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .connection {
+      position: absolute;
+      background-color: #7986cb;
+      z-index: 5;
+      transform-origin: left center;
+    }
+
+    .thick-connection {
+      height: 4px;
+    }
+
+    .medium-connection {
+      height: 3px;
+    }
+
+    .thin-connection {
+      height: 2px;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    #detail-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+      z-index: 30;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #detail-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    #detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #999;
+    }
+
+    #detail-close:hover {
+      color: #333;
+    }
+
+    .fact-list {
+      margin-top: 10px;
+    }
+
+    .fact-item {
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .relationship-list {
+      margin-top: 15px;
+    }
+
+    .relationship-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .relationship-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 25;
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #555;
+      z-index: 25;
+      max-width: 250px;
+    }
+
+    #main-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="concept-map-container"></div>
+
+  <div id="tooltip"></div>
+
+  <div id="detail-panel">
+    <div id="detail-close">×</div>
+    <div id="detail-title"></div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="title-overlay">
+    <h1 id="main-title">Chronic Pancreatitis Pain</h1>
+    <p id="subtitle">Interactive Mind Map</p>
+  </div>
+
+  <script>
+    // =========================
+    // DEFINE CONCEPTS & NODES
+    // =========================
+
+    // Center Concept
+    const centerConcept = {
+      id: "chronic-pancreatitis-pain",
+      name: "CHRONIC\nPANCREATITIS\nPAIN",
+      type: "center-concept",
+      description: "The most disabling symptom of chronic pancreatitis, affecting up to 90% of patients over their lifetime",
+      facts: [
+        "Affects up to 90% of patients with chronic pancreatitis",
+        "Multiple mechanisms influence pain experience",
+        "No cure or definitive treatment currently exists",
+        "Pain management is individualized and complex"
+      ]
+    };
+
+    // PRIMARY Concepts
+    const primaryConcepts = [
+      {
+        id: "pain-mechanisms",
+        name: "Pain\nMechanisms",
+        type: "primary-concept",
+        angle: 0,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Underlying physiological processes contributing to pain in chronic pancreatitis",
+        facts: [
+          "Includes inflammation, ductal obstruction, and neuropathy",
+          "Central sensitization is a critical mechanism often overlooked",
+          "Pain can persist even after successful treatment of ductal obstruction",
+          "Different mechanisms require different treatment approaches"
+        ],
+        relationships: []
+      },
+      {
+        id: "pain-patterns",
+        name: "Pain\nPatterns",
+        type: "primary-concept",
+        angle: 60,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Classification of pain presentations in chronic pancreatitis patients",
+        facts: [
+          "Type A: Intermittent pain with pain-free intervals",
+          "Type B: Constant pain with exacerbations",
+          "15-20% of patients have no pain despite evidence of chronic pancreatitis",
+          "Pain patterns change in 61% of patients over time"
+        ],
+        relationships: []
+      },
+      {
+        id: "comorbidities",
+        name: "Psychiatric\nComorbidities",
+        type: "primary-concept",
+        angle: 120,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Psychiatric conditions commonly co-occurring with chronic pancreatitis",
+        facts: [
+          "Anxiety present in almost 50% of patients",
+          "Depression symptoms in nearly 40%",
+          "Overlap syndrome in about one-third of patients",
+          "Associated with higher pain severity and interference"
+        ],
+        relationships: []
+      },
+      {
+        id: "assessment",
+        name: "Pain\nAssessment",
+        type: "primary-concept",
+        angle: 180,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Methods and tools for evaluating pain in chronic pancreatitis",
+        facts: [
+          "Traditional tools fail to assess all important pain domains",
+          "COMPAT Short Form is a comprehensive assessment tool",
+          "Pancreatic Quantitative Sensory Testing (PQST) helps identify central sensitization",
+          "Proper assessment critical for treatment selection"
+        ],
+        relationships: []
+      },
+      {
+        id: "interventions",
+        name: "Interventional\nApproaches",
+        type: "primary-concept",
+        angle: 240,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Invasive procedures to manage pain in chronic pancreatitis",
+        facts: [
+          "ERCP and drainage surgery for ductal obstruction",
+          "Pain relief from invasive treatments is often suboptimal",
+          "Only 50-60% of patients have durable response to interventions",
+          "Response rate lower in patients with central sensitization"
+        ],
+        relationships: []
+      },
+      {
+        id: "pharmacotherapy",
+        name: "Pharmacological\nApproaches",
+        type: "primary-concept",
+        angle: 300,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Medication strategies for managing chronic pancreatitis pain",
+        facts: [
+          "No FDA-approved drug therapy specifically for chronic pancreatitis",
+          "Treatments focus on symptom management",
+          "Off-label use of medications is common",
+          "Pregabalin is one of few medications rigorously studied"
+        ],
+        relationships: []
+      }
+    ];
+
+    // SECONDARY Concepts
+    const secondaryConcepts = [
+      {
+        id: "central-sensitization",
+        name: "Central\nSensitization",
+        type: "secondary-concept",
+        parentId: "pain-mechanisms",
+        angle: 345,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Amplification of neural signaling in the central nervous system eliciting pain hypersensitivity",
+        facts: [
+          "Neuroplastic and neuropathic changes in response to persistent pain",
+          "Can lead to increased pain despite stable disease",
+          "No diagnostic test currently identifies it definitively",
+          "Associated with poorer response to invasive treatments"
+        ]
+      },
+      {
+        id: "dynamic-patterns",
+        name: "Dynamic Pain\nPatterns",
+        type: "secondary-concept",
+        parentId: "pain-patterns",
+        angle: 30,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "The changing nature of pain over the course of chronic pancreatitis",
+        facts: [
+          "61% of patients have at least one change in pain profile over time",
+          "Moving target for treatment strategies",
+          "May reflect disease progression or central sensitization",
+          "Requires regular reassessment of pain characteristics"
+        ]
+      },
+      {
+        id: "anxiety-depression",
+        name: "Anxiety &\nDepression",
+        type: "secondary-concept",
+        parentId: "comorbidities",
+        angle: 90,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Psychological conditions frequently co-occurring with chronic pancreatitis",
+        facts: [
+          "Hospital Anxiety and Depression Scale is effective for screening",
+          "Associated with reduced quality of life across all domains",
+          "May resolve when pain is successfully treated",
+          "Independent of hyperalgesia detected by PQST"
+        ]
+      },
+      {
+        id: "pqst",
+        name: "PQST\nTesting",
+        type: "secondary-concept",
+        parentId: "assessment",
+        angle: 150,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Pancreatic Quantitative Sensory Testing - standardized stimulations to reveal sensory nerve function",
+        facts: [
+          "Uses temporal summation, pressure detection, and conditioned pain modulation",
+          "Identifies three phenotypes: widespread hyperalgesia, segmental hyperalgesia, and no hyperalgesia",
+          "Can predict response to invasive treatments",
+          "Research technique becoming more widely adopted"
+        ]
+      },
+      {
+        id: "compat",
+        name: "COMPAT\nTool",
+        type: "secondary-concept",
+        parentId: "assessment",
+        angle: 210,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Comprehensive Pain Assessment Tool specifically developed for chronic pancreatitis",
+        facts: [
+          "Initially 17 pages, refined to 3-page short form",
+          "Takes about 10 minutes to complete",
+          "Assesses majority of important pain domains",
+          "Scored out of 100 for tracking response to interventions"
+        ]
+      },
+      {
+        id: "ercp",
+        name: "ERCP\nTherapy",
+        type: "secondary-concept",
+        parentId: "interventions",
+        angle: 210,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Endoscopic Retrograde Cholangiopancreatography for treating ductal obstruction",
+        facts: [
+          "Used for pancreatic duct stones or strictures",
+          "Technical success does not guarantee pain relief",
+          "Less effective in patients with widespread hyperalgesia",
+          "Sometimes combined with extracorporeal shockwave lithotripsy"
+        ]
+      },
+      {
+        id: "surgery",
+        name: "Surgical\nOptions",
+        type: "secondary-concept",
+        parentId: "interventions",
+        angle: 270,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Surgical interventions for chronic pancreatitis pain",
+        facts: [
+          "Includes drainage procedures and resection procedures",
+          "Total pancreatectomy with islet autotransplantation for refractory cases",
+          "Patient selection critical for successful outcomes",
+          "Surgical vs. endoscopic approach remains controversial"
+        ]
+      },
+      {
+        id: "gabapentinoids",
+        name: "Gaba-\npentinoids",
+        type: "secondary-concept",
+        parentId: "pharmacotherapy",
+        angle: 270,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Anticonvulsant medications used for neuropathic pain in chronic pancreatitis",
+        facts: [
+          "Pregabalin shows efficacy in clinical trials",
+          "Gabapentin prescribed to nearly 60% of patients",
+          "More effective in patients with central sensitization",
+          "Reduces but doesn't eliminate pain"
+        ]
+      },
+      {
+        id: "antidepressants",
+        name: "Anti-\ndepressants",
+        type: "secondary-concept",
+        parentId: "pharmacotherapy",
+        angle: 330,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Antidepressant medications used for pain management and psychiatric comorbidities",
+        facts: [
+          "SSRIs commonly used in chronic pancreatitis patients",
+          "SNRIs (duloxetine) used less frequently despite potential benefit",
+          "Addresses both pain and psychiatric symptoms",
+          "Limited specific evidence in chronic pancreatitis population"
+        ]
+      }
+    ];
+
+    // TERTIARY Concepts
+    const tertiaryConcepts = [
+      {
+        id: "hyperalgesia",
+        name: "Hyperalgesia",
+        type: "tertiary-concept",
+        parentId: "central-sensitization",
+        angle: 315,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Increased pain from stimuli that normally cause little pain",
+        facts: [
+          "Can be segmental (around pancreas) or widespread",
+          "Widespread hyperalgesia present in ~25% of patients",
+          "Segmental hyperalgesia in ~30% of patients",
+          "Correlates with higher pain intensity and interference"
+        ]
+      },
+      {
+        id: "allodynia",
+        name: "Allodynia",
+        type: "tertiary-concept",
+        parentId: "central-sensitization",
+        angle: 15,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Pain from stimuli that normally don't cause pain",
+        facts: [
+          "Result of abnormal central pain processing",
+          "Sign of advanced central sensitization",
+          "Difficult to treat with conventional approaches",
+          "May require targeted neuromodulatory treatments"
+        ]
+      },
+      {
+        id: "predictive-value",
+        name: "Prediction\nModels",
+        type: "tertiary-concept",
+        parentId: "pqst",
+        angle: 180,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Using PQST phenotyping to predict treatment response",
+        facts: [
+          "Pilot study shows lower response rates in widespread hyperalgesia patients",
+          "Ongoing clinical trial at UPMC, Johns Hopkins, and Indiana University",
+          "May help improve patient selection for invasive treatments",
+          "Could prevent unnecessary procedures in poor candidates"
+        ]
+      },
+      {
+        id: "biomarkers",
+        name: "Biomarker\nResearch",
+        type: "tertiary-concept",
+        parentId: "pqst",
+        angle: 120,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Efforts to identify blood or urine markers for central sensitization",
+        facts: [
+          "Pilot studies using mesoscale discovery analysis",
+          "Analyzing chemokines and neurokines",
+          "Several candidates show promise as predictive biomarkers",
+          "Still in early research phases"
+        ]
+      },
+      {
+        id: "clinical-trials",
+        name: "Current\nTrials",
+        type: "tertiary-concept",
+        parentId: "pharmacotherapy",
+        angle: 300,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Ongoing clinical trials for chronic pancreatitis pain management",
+        facts: [
+          "Lacosamide study - anti-epileptic to potentiate opioid effects",
+          "Cognitive behavioral therapy to enhance coping mechanisms",
+          "PQST prediction trial for treatment response",
+          "Focus on targeted therapies based on pain phenotype"
+        ]
+      }
+    ];
+
+    // ===================================
+    // REUSABLE FUNCTIONS & MAP CREATION
+    // ===================================
+
+    // Main function to initialize the concept map
+    function initializeConceptMap() {
+      const container = document.getElementById('concept-map-container');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Create center concept
+      createConcept(centerConcept, centerX, centerY);
+
+      // Create primary concepts
+      primaryConcepts.forEach(concept => {
+        const angleRad = concept.angle * (Math.PI / 180);
+        const x = centerX + Math.cos(angleRad) * concept.distance;
+        const y = centerY + Math.sin(angleRad) * concept.distance;
+
+        createConcept(concept, x, y);
+        createConnection(centerX, centerY, x, y, concept.connectionType, concept.angle);
+      });
+
+      // Create secondary concepts
+      secondaryConcepts.forEach(concept => {
+        const parent = primaryConcepts.find(p => p.id === concept.parentId);
+        if (parent) {
+          const parentAngleRad = parent.angle * (Math.PI / 180);
+          const parentX = centerX + Math.cos(parentAngleRad) * parent.distance;
+          const parentY = centerY + Math.sin(parentAngleRad) * parent.distance;
+
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+
+      // Create tertiary concepts
+      tertiaryConcepts.forEach(concept => {
+        let parentX, parentY;
+        const parent = secondaryConcepts.find(p => p.id === concept.parentId);
+        
+        if (parent) {
+          const grandParent = primaryConcepts.find(p => p.id === parent.parentId);
+          if (grandParent) {
+            const grandParentAngleRad = grandParent.angle * (Math.PI / 180);
+            const grandParentX = centerX + Math.cos(grandParentAngleRad) * grandParent.distance;
+            const grandParentY = centerY + Math.sin(grandParentAngleRad) * grandParent.distance;
+
+            const parentAngleRad = parent.angle * (Math.PI / 180);
+            parentX = grandParentX + Math.cos(parentAngleRad) * parent.distance;
+            parentY = grandParentY + Math.sin(parentAngleRad) * parent.distance;
+          }
+        } else {
+          // If parent is a primary concept, not a secondary concept
+          const primaryParent = primaryConcepts.find(p => p.id === concept.parentId);
+          if (primaryParent) {
+            const parentAngleRad = primaryParent.angle * (Math.PI / 180);
+            parentX = centerX + Math.cos(parentAngleRad) * primaryParent.distance;
+            parentY = centerY + Math.sin(parentAngleRad) * primaryParent.distance;
+          }
+        }
+
+        if (parentX && parentY) {
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+    }
+
+    // Function to create a concept node
+    function createConcept(concept, x, y) {
+      const conceptElement = document.createElement('div');
+      conceptElement.className = `concept ${concept.type}`;
+      conceptElement.id = concept.id;
+      conceptElement.textContent = concept.name;
+      conceptElement.style.left = `${x - (conceptElement.offsetWidth || 120) / 2}px`;
+      conceptElement.style.top = `${y - (conceptElement.offsetHeight || 120) / 2}px`;
+
+      // Add event listeners
+      conceptElement.addEventListener('mouseover', (e) => {
+        e.stopPropagation(); // Prevent drag while interacting with nodes
+        showTooltip(concept, e);
+      });
+      conceptElement.addEventListener('mouseout', hideTooltip);
+      conceptElement.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent drag while clicking nodes
+        showDetails(concept);
+      });
+
+      // Add touch event handlers
+      conceptElement.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      conceptElement.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+        hideTooltip();
+      });
+
+      document.getElementById('concept-map-container').appendChild(conceptElement);
+
+      // Update position after appending to account for actual size
+      setTimeout(() => {
+        conceptElement.style.left = `${x - conceptElement.offsetWidth / 2}px`;
+        conceptElement.style.top = `${y - conceptElement.offsetHeight / 2}px`;
+      }, 0);
+
+      return conceptElement;
+    }
+
+    // Function to create connection lines between concepts
+    function createConnection(x1, y1, x2, y2, type, angle) {
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const angleRad = Math.atan2(y2 - y1, x2 - x1);
+
+      const connection = document.createElement('div');
+      connection.className = `connection ${type}`;
+      connection.style.width = `${length}px`;
+      connection.style.left = `${x1}px`;
+      connection.style.top = `${y1}px`;
+      connection.style.transform = `rotate(${angleRad}rad)`;
+
+      document.getElementById('concept-map-container').appendChild(connection);
+    }
+
+    // Function to show tooltip on hover
+    function showTooltip(concept, event) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = concept.description;
+      tooltip.style.left = `${event.pageX + 15}px`;
+      tooltip.style.top = `${event.pageY + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    // Function to hide tooltip
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Function to show concept details in side panel
+    function showDetails(concept) {
+      const detailPanel = document.getElementById('detail-panel');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      detailTitle.textContent = concept.name;
+
+      // Create content with description and facts
+      let content = `<p>${concept.description}</p>`;
+
+      // Add facts
+      if (concept.facts && concept.facts.length > 0) {
+        content += `<h2>Key Facts</h2><div class="fact-list">`;
+        concept.facts.forEach(fact => {
+          content += `<div class="fact-item">• ${fact}</div>`;
+        });
+        content += `</div>`;
+      }
+
+      // Add relationships if they exist
+      if (concept.relationships && concept.relationships.length > 0) {
+        content += `<h2>Relationships</h2><div class="relationship-list">`;
+        concept.relationships.forEach(rel => {
+          const allConcepts = [...primaryConcepts, ...secondaryConcepts, ...tertiaryConcepts, centerConcept];
+          const relatedConcept = allConcepts.find(c => c.id === rel.to);
+          if (relatedConcept) {
+            let color;
+            switch (relatedConcept.type) {
+              case "primary-concept":
+                color = "#3f51b5";
+                break;
+              case "secondary-concept":
+                color = "#03a9f4";
+                break;
+              case "tertiary-concept":
+                color = "#4caf50";
+                break;
+              default:
+                color = "#9c27b0";
+                break;
+            }
+            content += `
+              <div class="relationship-item">
+                <div class="relationship-dot" style="background-color: ${color}"></div>
+                <span><b>${relatedConcept.name}</b>: ${rel.description}</span>
+              </div>`;
+          }
+        });
+        content += `</div>`;
+      }
+
+      detailContent.innerHTML = content;
+      detailPanel.style.display = 'block';
+    }
+
+    // Close detail panel
+    document.getElementById('detail-close').addEventListener('click', () => {
+      document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // ===================================
+    // DRAG / PAN FUNCTIONALITY
+    // ===================================
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleDragStart(e) {
+      // Don't drag if clicking on a concept node
+      if (e.target.classList.contains('concept')) return;
+
+      isDragging = true;
+
+      if (e.type === 'mousedown') {
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+
+      document.getElementById('concept-map-container').style.cursor = 'grabbing';
+    }
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      let currentClientX, currentClientY;
+
+      if (e.type === 'mousemove') {
+        currentClientX = e.clientX;
+        currentClientY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchmove') {
+        currentClientX = e.touches[0].clientX;
+        currentClientY = e.touches[0].clientY;
+        e.preventDefault();
+      }
+
+      const deltaX = currentClientX - startX;
+      const deltaY = currentClientY - startY;
+
+      currentX = offsetX + deltaX;
+      currentY = offsetY + deltaY;
+
+      const container = document.getElementById('concept-map-container');
+      container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+    }
+
+    function handleDragEnd() {
+      if (!isDragging) return;
+
+      isDragging = false;
+      offsetX = currentX;
+      offsetY = currentY;
+      document.getElementById('concept-map-container').style.cursor = 'move';
+    }
+
+    // Initialize the concept map when the page loads
+    window.addEventListener('load', () => {
+      initializeConceptMap();
+
+      const container = document.getElementById('concept-map-container');
+      container.addEventListener('mousedown', handleDragStart);
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+
+      container.addEventListener('touchstart', handleDragStart, { passive: false });
+      window.addEventListener('touchmove', handleDrag, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+    });
+
+    // Handle window resize (rebuild map)
+    window.addEventListener('resize', () => {
+      offsetX = 0;
+      offsetY = 0;
+      currentX = 0;
+      currentY = 0;
+      document.getElementById('concept-map-container').innerHTML = '';
+
+
+
+document.getElementById('concept-map-container').style.transform = '';
+      initializeConceptMap();
+    });
+  </script>
+</body>
+</html>
