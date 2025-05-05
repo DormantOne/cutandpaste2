@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      max-width: 400px;
+      max-width: 440px;
       margin: auto;
       font-family: 'Georgia', serif;
       padding: 1em;
@@ -18,24 +18,38 @@
       text-align: center;
       margin-bottom: 0.5em;
     }
-    a {
+    .link-box {
+      background-color: #eef4fa;
+      border-left: 5px solid #4a90e2;
+      padding: 0.6em 0.8em;
+      margin: 0.5em 0;
+      border-radius: 6px;
+      transition: transform 0.2s ease;
+    }
+    .link-box:hover {
+      transform: scale(1.03);
+      background-color: #e0edf9;
+    }
+    .link-box a {
       color: #0645ad;
+      font-weight: bold;
+      font-size: 1.05em;
       text-decoration: none;
       display: block;
-      margin: 0.4em 0;
-      font-size: 1em;
     }
-    a:hover {
-      text-decoration: underline;
+    .link-box span {
+      font-size: 0.85em;
+      color: #555;
+      font-style: italic;
     }
     hr {
-      margin: 1em 0;
+      margin: 1.5em 0;
       border: none;
       border-top: 1px solid #ccc;
     }
     .qr-container {
       text-align: center;
-      margin-top: 1.5em;
+      margin-top: 2em;
     }
     .qr-container img {
       width: 150px;
@@ -52,21 +66,58 @@
 
   <h2>📚 Dr. Rashidi's AI Course</h2>
 
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EV1hvPxnYhVEkCsV9SdvPmMBRmhxEUAF-4_7Ky8sjdN3FA?e=t2leYa" target="_blank">Part 1</a>
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/ES7gLiMRz8REjqkhizLdD_MBqTnk_jnBe66pWs4_hS8B1Q?e=dE6VUD" target="_blank">Part 2</a>
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EWvd1oP_pL9JiRoLma-dbHMBelFY29ULBqfTA0zqb02UrQ?e=smWrOc" target="_blank">Part 3</a>
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EWvd1oP_pL9JiRoLma-dbHMBelFY29ULBqfTA0zqb02UrQ?e=smWrOc" target="_blank">Part 4</a>
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/ESWWNpLbAtZGpjmq8rEbFZQBltKLVO4VxpWvA8whqV0TBg?e=Ggm2Iq" target="_blank">Part 5</a>
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EelDqXaghQFIhkFeqXI0tIsB4IJedoIg63DoopuEH68nMw?e=ADaeL0" target="_blank">Part 6</a>
-  <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EelDqXaghQFIhkFeqXI0tIsB4IJedoIg63DoopuEH68nMw?e=ADaeL0" target="_blank">Part 7</a>
-  <a href="https://upmchs-my.sharepoint.com/:u:/g/personal/sohnae_upmc_edu/EdlUErBBjMFHtcFJfFtDWcABhXNti2FfYBLOJ3joNssjIw?e=XvfsjB" target="_blank">🎧 Podcast</a>
-  <a href="https://dormantone.github.io/cutandpaste2/ai.html" target="_blank">🧠 Concept Map</a>
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EV1hvPxnYhVEkCsV9SdvPmMBRmhxEUAF-4_7Ky8sjdN3FA?e=t2leYa" target="_blank">📘 Part 1</a>
+    <span>Intro to AI & ML in Pathology and Medicine</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/ES7gLiMRz8REjqkhizLdD_MBqTnk_jnBe66pWs4_hS8B1Q?e=dE6VUD" target="_blank">📗 Part 2</a>
+    <span>Generative AI: A Deeper Dive</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EWvd1oP_pL9JiRoLma-dbHMBelFY29ULBqfTA0zqb02UrQ?e=smWrOc" target="_blank">📙 Part 3</a>
+    <span>Non-Generative AI in Medicine: Applications</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EWvd1oP_pL9JiRoLma-dbHMBelFY29ULBqfTA0zqb02UrQ?e=smWrOc" target="_blank">📕 Part 4</a>
+    <span>Statistics of Generative & Predictive AI</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/ESWWNpLbAtZGpjmq8rEbFZQBltKLVO4VxpWvA8whqV0TBg?e=Ggm2Iq" target="_blank">📓 Part 5</a>
+    <span>Regulatory Aspects of AI/ML</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EelDqXaghQFIhkFeqXI0tIsB4IJedoIg63DoopuEH68nMw?e=ADaeL0" target="_blank">📔 Part 6</a>
+    <span>Ethics and Bias in AI/ML</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/EelDqXaghQFIhkFeqXI0tIsB4IJedoIg63DoopuEH68nMw?e=ADaeL0" target="_blank">📒 Part 7</a>
+    <span>Future of AI/ML in Pathology and Medicine</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://upmchs-my.sharepoint.com/:u:/g/personal/sohnae_upmc_edu/EdlUErBBjMFHtcFJfFtDWcABhXNti2FfYBLOJ3joNssjIw?e=XvfsjB" target="_blank">🎧 Podcast</a>
+    <span>Audio Summary and Interviews</span>
+  </div>
+
+  <div class="link-box">
+    <a href="https://dormantone.github.io/cutandpaste2/ai.html" target="_blank">🧭 Concept Map</a>
+    <span>Visual Overview of Core AI Topics</span>
+  </div>
 
   <hr>
 
-  <h3>🧠 CMI AI LABS</h3>
+  <h3>🧭 CMI AI LABS</h3>
   <p class="section-note">In-House RAG Demo using <i>Flatland</i></p>
-  <a href="https://aisecure.cmihandbook.com/flatland-librarian" target="_blank">Explore Flatland Librarian</a>
+  <a class="link-box" href="https://aisecure.cmihandbook.com/flatland-librarian" target="_blank">
+    🗂 Explore Flatland Librarian
+  </a>
 
   <div class="qr-container">
     <p class="section-note">📎 Share or return to this page:</p>
