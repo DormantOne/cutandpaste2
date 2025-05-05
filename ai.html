@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI and ML in Pathology and Medicine Concept Map</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      overflow: hidden;
+      touch-action: none; /* Prevents browser handling of touch events */
+    }
+
+    #concept-map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      cursor: move;
+    }
+
+    .concept {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .center-concept {
+      background-color: #9c27b0;
+      width: 160px;
+      height: 160px;
+      font-size: 18px;
+      z-index: 20;
+    }
+
+    .primary-concept {
+      background-color: #3f51b5;
+      width: 120px;
+      height: 120px;
+      font-size: 14px;
+    }
+
+    .secondary-concept {
+      background-color: #03a9f4;
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+    }
+
+    .tertiary-concept {
+      background-color: #4caf50;
+      width: 70px;
+      height: 70px;
+      font-size: 11px;
+    }
+
+    .concept:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .connection {
+      position: absolute;
+      background-color: #7986cb;
+      z-index: 5;
+      transform-origin: left center;
+    }
+
+    .thick-connection {
+      height: 4px;
+    }
+
+    .medium-connection {
+      height: 3px;
+    }
+
+    .thin-connection {
+      height: 2px;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    #detail-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+      z-index: 30;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #detail-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    #detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #999;
+    }
+
+    #detail-close:hover {
+      color: #333;
+    }
+
+    .fact-list {
+      margin-top: 10px;
+    }
+
+    .fact-item {
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .relationship-list {
+      margin-top: 15px;
+    }
+
+    .relationship-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .relationship-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 25;
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #555;
+      z-index: 25;
+      max-width: 250px;
+      display: block;
+    }
+
+    #main-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="concept-map-container"></div>
+
+  <div id="tooltip"></div>
+
+  <div id="detail-panel">
+    <div id="detail-close">×</div>
+    <div id="detail-title"></div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="title-overlay">
+    <h1 id="main-title">AI and ML in Pathology & Medicine</h1>
+    <p id="subtitle">Interactive Mind Map</p>
+  </div>
+
+  <div id="instructions">
+    <p>Click any node to view details. Drag the map to explore.</p>
+  </div>
+
+  <script>
+    // =========================
+    // DEFINE CONCEPTS & NODES
+    // =========================
+
+    // Center Concept
+    const centerConcept = {
+      id: "ai-ml-pathology-medicine",
+      name: "AI & ML IN\nPATHOLOGY &\nMEDICINE",
+      type: "center-concept",
+      description: "A comprehensive overview of artificial intelligence and machine learning in pathology and medicine, covering key terminology, data types, and their applications.",
+      facts: [
+        "AI-ML tools are revolutionizing medicine by strengthening medical diagnoses, improving research, and enhancing education",
+        "AI-ML algorithms can assess large quantities of data (image, text, or tabular) with unprecedented accuracy and speed",
+        "This field continues to grow with major advances in deep learning and computing power",
+        "Understanding bias, ethics, and regulatory challenges is crucial for responsible implementation"
+      ]
+    };
+
+    // PRIMARY Concepts
+    const primaryConcepts = [
+      {
+        id: "terminology",
+        name: "Key\nTerminology",
+        type: "primary-concept",
+        angle: 0,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Essential terms and definitions in AI-ML that provide a foundation for understanding the field",
+        facts: [
+          "Covering both generative and non-generative AI terminology",
+          "Includes statistical measures and performance metrics",
+          "Provides medical examples for each term",
+          "Explains concepts ranging from basic (accuracy, algorithm) to advanced (transformers, foundation models)"
+        ],
+        relationships: []
+      },
+      {
+        id: "data-types",
+        name: "Data\nTypes",
+        type: "primary-concept",
+        angle: 60,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "The main categories of data used in AI-ML applications in medicine",
+        facts: [
+          "Three main data types: images (including video), text (including audio), and numeric/tabular data",
+          "Each type requires specific preparation activities",
+          "Different AI-ML frameworks are used for each data type",
+          "Choice of framework depends on data type and problem being addressed"
+        ],
+        relationships: []
+      },
+      {
+        id: "ml-categories",
+        name: "ML\nCategories",
+        type: "primary-concept",
+        angle: 120,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "The main approaches to machine learning used in medical applications",
+        facts: [
+          "Includes supervised, unsupervised, and reinforcement learning",
+          "Each category has distinct methodologies and applications",
+          "Supervised learning uses labeled data for classification and regression tasks",
+          "Generative AI uses a combination of these traditional ML categories"
+        ],
+        relationships: []
+      },
+      {
+        id: "generative-ai",
+        name: "Generative\nAI",
+        type: "primary-concept",
+        angle: 180,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "AI models that create new content like text, images, or sounds based on their training data",
+        facts: [
+          "Large Language Models (LLMs) like GPT-4 can generate human-like text responses",
+          "Multimodal models can process multiple types of data simultaneously",
+          "Employs transformer architecture with self-attention mechanisms",
+          "Combines unsupervised pre-training with supervised instruction and reinforcement learning"
+        ],
+        relationships: []
+      },
+      {
+        id: "non-generative-ai",
+        name: "Non-Generative\nAI",
+        type: "primary-concept",
+        angle: 240,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Traditional AI approaches focused on specific tasks like classification and prediction rather than content generation",
+        facts: [
+          "Emphasis on prediction based on existing labeled data",
+          "Typically uses confusion matrix-based metrics for evaluation",
+          "Includes methods like random forest, support vector machines, and logistic regression",
+          "Neural networks are commonly used for image and text analysis"
+        ],
+        relationships: []
+      },
+      {
+        id: "applications",
+        name: "Clinical\nApplications",
+        type: "primary-concept",
+        angle: 300,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Ways AI-ML is being applied in pathology and medicine to improve diagnosis, workflow, research, and education",
+        facts: [
+          "Deep learning systems aid radiologists and pathologists in image analysis",
+          "Clinical decision support systems analyze EHRs for personalized treatment recommendations",
+          "AI tools help identify new biomarkers and drug targets through genomic data analysis",
+          "Generative AI enhances education, reporting, and data searching"
+        ],
+        relationships: []
+      }
+    ];
+
+    // SECONDARY Concepts
+    const secondaryConcepts = [
+      {
+        id: "ml-performance-metrics",
+        name: "Performance\nMetrics",
+        type: "secondary-concept",
+        parentId: "terminology",
+        angle: 330,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Measures used to evaluate the effectiveness of AI-ML models",
+        facts: [
+          "Classification metrics: accuracy, sensitivity, specificity, precision, F1-score",
+          "Regression metrics: RMSE, MAE, R-squared",
+          "ROC curves and AUC for overall performance assessment",
+          "Confusion matrix as foundation for many performance calculations"
+        ]
+      },
+      {
+        id: "ai-components",
+        name: "AI-ML\nComponents",
+        type: "secondary-concept",
+        parentId: "terminology",
+        angle: 30,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Building blocks and architectural elements of AI-ML systems",
+        facts: [
+          "Neural networks: multilayer perceptron, CNN, RNN, transformer",
+          "Ensemble methods: random forest, boosting, bagging",
+          "Hyperparameters and optimization techniques",
+          "Activation functions and gradient descent"
+        ]
+      },
+      {
+        id: "image-data",
+        name: "Image\nData",
+        type: "secondary-concept",
+        parentId: "data-types",
+        angle: 45,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Visual data used in medical AI applications, including whole slide images and radiologic images",
+        facts: [
+          "Typically analyzed using computer vision and CNNs",
+          "Includes pathology whole slide images (WSI) and radiologic images (DICOM)",
+          "Used for classification tasks like distinguishing cancer from normal tissue",
+          "Requires specialized hardware for processing high-resolution images"
+        ]
+      },
+      {
+        id: "text-data",
+        name: "Text\nData",
+        type: "secondary-concept",
+        parentId: "data-types",
+        angle: 60,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Unstructured textual information processed through natural language processing techniques",
+        facts: [
+          "Processed using natural language processing (NLP)",
+          "Modern approaches use transformer-based architectures (GPT, LLAMA)",
+          "Applications include report generation, summarization, and information extraction",
+          "Can analyze clinical notes and research papers"
+        ]
+      },
+      {
+        id: "tabular-data",
+        name: "Tabular\nData",
+        type: "secondary-concept",
+        parentId: "data-types",
+        angle: 75,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Structured data organized in rows and columns, common in electronic health records",
+        facts: [
+          "Includes continuous and discrete values",
+          "Common in electronic health record settings",
+          "Traditional ML algorithms like logistic regression and random forest are often used",
+          "Used for predictive modeling of disease states and patient outcomes"
+        ]
+      },
+      {
+        id: "supervised-learning",
+        name: "Supervised\nLearning",
+        type: "secondary-concept",
+        parentId: "ml-categories",
+        angle: 105,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Training machines using labeled data sets to make predictions on new data",
+        facts: [
+          "Uses labeled data where ground truth is provided",
+          "Includes classification (categorical output) and regression (continuous output) tasks",
+          "Requires expert annotation of training data",
+          "Examples include tumor classification and biomarker prediction"
+        ]
+      },
+      {
+        id: "unsupervised-learning",
+        name: "Unsupervised\nLearning",
+        type: "secondary-concept",
+        parentId: "ml-categories",
+        angle: 120,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Training machines on unlabeled data to identify patterns without prior knowledge",
+        facts: [
+          "Common methods include clustering, dimensionality reduction, and anomaly detection",
+          "Used to discover hidden insights and relationships",
+          "Can serve as input for supervised learning models",
+          "Examples include patient stratification and gene expression analysis"
+        ]
+      },
+      {
+        id: "reinforcement-learning",
+        name: "Reinforcement\nLearning",
+        type: "secondary-concept",
+        parentId: "ml-categories",
+        angle: 135,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Training autonomous agents through rewards and penalties for actions",
+        facts: [
+          "Agents learn to make decisions through iterative interactions",
+          "Used to optimize treatment approaches in medicine",
+          "Employed in fine-tuning LLMs through human feedback (RLHF)",
+          "Limited but growing use in clinical settings"
+        ]
+      },
+      {
+        id: "llm-architectures",
+        name: "LLM\nArchitectures",
+        type: "secondary-concept",
+        parentId: "generative-ai",
+        angle: 165,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Foundational designs for large language models that power generative AI systems",
+        facts: [
+          "Transformer-based neural networks with self-attention mechanisms",
+          "Can process and generate human-like language",
+          "Examples include GPT (OpenAI), Claude (Anthropic), Gemini (Google), and Llama (Meta)",
+          "Trained on vast text corpora and fine-tuned for specific tasks"
+        ]
+      },
+      {
+        id: "multimodal-models",
+        name: "Multimodal\nModels",
+        type: "secondary-concept",
+        parentId: "generative-ai",
+        angle: 195,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "AI systems that can process multiple types of data simultaneously, such as text and images",
+        facts: [
+          "Can process different data types (image, text) simultaneously",
+          "Examples include GPT-4o, which handles both text and images",
+          "Enables comprehensive understanding of complex medical data",
+          "Can analyze medical images while considering patient history"
+        ]
+      },
+      {
+        id: "generative-limitations",
+        name: "Generative\nLimitations",
+        type: "secondary-concept",
+        parentId: "generative-ai",
+        angle: 225,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Challenges and constraints in using generative AI in healthcare settings",
+        facts: [
+          "Potential for hallucination and factual inaccuracies",
+          "Lack of well-defined evaluation criteria",
+          "Biases in generated content can be difficult to detect",
+          "Ethical concerns regarding content generation and intellectual property"
+        ]
+      },
+      {
+        id: "classification-models",
+        name: "Classification\nModels",
+        type: "secondary-concept",
+        parentId: "non-generative-ai",
+        angle: 225,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "AI systems designed to categorize data into predefined classes or categories",
+        facts: [
+          "Predicts categorical labels like malignant vs. benign",
+          "Evaluated using metrics like accuracy, sensitivity, and specificity",
+          "Algorithms include random forest, SVM, and neural networks",
+          "Applications include cancer diagnosis and disease identification"
+        ]
+      },
+      {
+        id: "regression-models",
+        name: "Regression\nModels",
+        type: "secondary-concept",
+        parentId: "non-generative-ai",
+        angle: 255,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "AI systems that predict continuous numeric values rather than categories",
+        facts: [
+          "Predicts continuous values such as biomarker concentrations",
+          "Uses error-based evaluation metrics like RMSE and R-squared",
+          "Applications include predicting disease progression and treatment response",
+          "Methods include linear regression, decision trees, and neural networks"
+        ]
+      },
+      {
+        id: "image-analysis",
+        name: "Image\nAnalysis",
+        type: "secondary-concept",
+        parentId: "applications",
+        angle: 285,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Using AI to analyze and interpret medical images for diagnosis and classification",
+        facts: [
+          "Deep learning models revolutionizing WSI and radiology image analysis",
+          "CNNs provide accurate detection and classification of structures and diseases",
+          "Applications include cancer detection, blood cell counting, and biomarker quantification",
+          "Superior to classical image analysis methods in handling complex patterns"
+        ]
+      },
+      {
+        id: "clinical-data-analysis",
+        name: "Clinical Data\nAnalysis",
+        type: "secondary-concept",
+        parentId: "applications",
+        angle: 315,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "AI applications for analyzing medical records and clinical data for insights and predictions",
+        facts: [
+          "Analyzing electronic health records for predictive modeling",
+          "Identifying patterns in lab results and patient outcomes",
+          "Detecting anomalies in clinical data",
+          "Supporting clinical decision-making and personalized medicine"
+        ]
+      },
+      {
+        id: "text-analysis",
+        name: "Medical Text\nAnalysis",
+        type: "secondary-concept",
+        parentId: "applications",
+        angle: 345,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "AI systems for analyzing and generating medical textual content",
+        facts: [
+          "NLP for extracting information from clinical notes and reports",
+          "Generative AI for summarizing research and creating documentation",
+          "Text analysis for identifying trends in medical literature",
+          "Automated report generation and standardization"
+        ]
+      }
+    ];
+
+    // TERTIARY Concepts
+    const tertiaryConcepts = [
+      {
+        id: "classification-tasks",
+        name: "Classification\nTasks",
+        type: "tertiary-concept",
+        parentId: "supervised-learning",
+        angle: 90,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Supervised learning tasks that predict categorical labels or classes",
+        facts: [
+          "Example: Binary classification of tumors (malignant/benign)",
+          "Applications in disease diagnosis and identification",
+          "Uses labeled training data with known outcomes",
+          "Performance measured using confusion matrix-derived metrics"
+        ]
+      },
+      {
+        id: "regression-tasks",
+        name: "Regression\nTasks",
+        type: "tertiary-concept",
+        parentId: "supervised-learning",
+        angle: 120,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Supervised learning tasks that predict continuous numeric values",
+        facts: [
+          "Predicts continuous values like biomarker concentrations",
+          "Applications in prognosis and treatment response prediction",
+          "Examples include predicting blood glucose levels or disease progression",
+          "Evaluated using metrics like MAE, MSE, and R-squared"
+        ]
+      },
+      {
+        id: "clustering",
+        name: "Clustering",
+        type: "tertiary-concept",
+        parentId: "unsupervised-learning",
+        angle: 105,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Unsupervised learning technique that groups similar data points into clusters",
+        facts: [
+          "Methods include K-means and hierarchical clustering",
+          "Used for patient stratification and disease subtyping",
+          "Identifies natural groupings without predefined labels",
+          "Applications in genomics and personalized medicine"
+        ]
+      },
+      {
+        id: "dimensionality-reduction",
+        name: "Dimension\nReduction",
+        type: "tertiary-concept",
+        parentId: "unsupervised-learning",
+        angle: 135,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Techniques for reducing the number of features while preserving important information",
+        facts: [
+          "Methods include PCA, t-SNE, and UMAP",
+          "Used for visualizing high-dimensional data",
+          "Important for processing complex genomic and proteomic data",
+          "Reduces computation needs and helps identify key patterns"
+        ]
+      },
+      {
+        id: "rlhf",
+        name: "RLHF",
+        type: "tertiary-concept",
+        parentId: "reinforcement-learning",
+        angle: 150,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Reinforcement Learning from Human Feedback - a method for fine-tuning language models",
+        facts: [
+          "Used in the final training stage of LLMs like ChatGPT",
+          "Human assessors provide feedback on model outputs",
+          "Helps align AI behavior with human preferences and values",
+          "Improves factual accuracy and reduces harmful outputs"
+        ]
+      },
+      {
+        id: "transformer-architecture",
+        name: "Transformer\nArchitecture",
+        type: "tertiary-concept",
+        parentId: "llm-architectures",
+        angle: 180,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "The neural network design that enables modern large language models",
+        facts: [
+          "Uses self-attention mechanisms to analyze entire sequences at once",
+          "Focuses on the most important parts of input data",
+          "Enables better understanding of context and relationships",
+          "Key innovation powering modern generative AI systems"
+        ]
+      },
+      {
+        id: "cnn",
+        name: "CNN",
+        type: "tertiary-concept",
+        parentId: "classification-models",
+        angle: 240,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Convolutional Neural Networks - specialized deep learning models for image processing",
+        facts: [
+          "Designed for processing visual data with spatial hierarchies",
+          "Use convolutional filters to detect features at different scales",
+          "Architecture mimics visual processing in biological systems",
+          "State-of-the-art for medical image classification tasks"
+        ]
+      },
+      {
+        id: "random-forest",
+        name: "Random\nForest",
+        type: "tertiary-concept",
+        parentId: "classification-models",
+        angle: 210,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Ensemble learning method combining multiple decision trees for improved prediction",
+        facts: [
+          "Combines results from many decision trees to improve accuracy",
+          "Reduces overfitting through bootstrap aggregation (bagging)",
+          "Effective for tabular data analysis in medical applications",
+          "Provides feature importance rankings for interpretability"
+        ]
+      },
+      {
+        id: "linear-regression",
+        name: "Linear\nRegression",
+        type: "tertiary-concept",
+        parentId: "regression-models",
+        angle: 255,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Modeling relationship between variables by fitting a linear equation to observed data",
+        facts: [
+          "Simplest form of regression for predicting continuous values",
+          "Assumes linear relationship between predictors and outcome",
+          "Used for biomarker prediction and treatment response modeling",
+          "Foundation for more complex regression techniques"
+        ]
+      },
+      {
+        id: "wsi-analysis",
+        name: "WSI\nAnalysis",
+        type: "tertiary-concept",
+        parentId: "image-analysis",
+        angle: 275,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "AI techniques for analyzing whole slide images in digital pathology",
+        facts: [
+          "Uses deep learning to analyze high-resolution pathology slides",
+          "Applications include cancer detection, grading, and biomarker quantification",
+          "Must handle extremely large image files efficiently",
+          "Can identify features invisible or missed by human pathologists"
+        ]
+      },
+      {
+        id: "radiomics",
+        name: "Radiomics",
+        type: "tertiary-concept",
+        parentId: "image-analysis",
+        angle: 295,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Advanced analysis of medical images to extract quantitative features for diagnostic and predictive modeling",
+        facts: [
+          "Extracts quantitative features from medical images that may be invisible to human eyes",
+          "Combines imaging with other data for comprehensive analysis",
+          "Applications in disease characterization and treatment planning",
+          "Enables personalized treatment based on imaging biomarkers"
+        ]
+      },
+      {
+        id: "ehr-analysis",
+        name: "EHR\nAnalysis",
+        type: "tertiary-concept",
+        parentId: "clinical-data-analysis",
+        angle: 320,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "AI approaches for analyzing electronic health record data for insights and predictions",
+        facts: [
+          "Analyzes structured and unstructured data from patient records",
+          "Applications in risk prediction, resource allocation, and disease management",
+          "Challenges include data quality, interoperability, and privacy concerns",
+          "Can identify patterns and relationships beyond traditional statistical methods"
+        ]
+      },
+      {
+        id: "report-generation",
+        name: "Report\nGeneration",
+        type: "tertiary-concept",
+        parentId: "text-analysis",
+        angle: 340,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Using AI to automatically create standardized medical reports and documentation",
+        facts: [
+          "Generative AI can draft initial reports based on clinical data",
+          "Improves standardization and reduces documentation burden",
+          "Can integrate findings from multiple data sources",
+          "Still requires human verification and oversight"
+        ]
+      },
+      {
+        id: "literature-analysis",
+        name: "Literature\nAnalysis",
+        type: "tertiary-concept",
+        parentId: "text-analysis",
+        angle: 0,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "AI systems for analyzing medical literature and research publications",
+        facts: [
+          "Processes vast amounts of medical literature to extract insights",
+          "Applications in systematic reviews and knowledge synthesis",
+          "Can identify emerging trends and research gaps",
+          "Helps clinicians stay updated with latest evidence"
+        ]
+      }
+    ];
+
+    // Function to create a concept node
+    function createConcept(concept, x, y) {
+      const conceptElement = document.createElement('div');
+      conceptElement.className = `concept ${concept.type}`;
+      conceptElement.id = concept.id;
+      conceptElement.textContent = concept.name;
+      conceptElement.style.left = `${x - 60}px`;  // Initial positioning
+      conceptElement.style.top = `${y - 60}px`;
+
+      // Add event listeners
+      conceptElement.addEventListener('mouseover', (e) => {
+        e.stopPropagation(); // Prevent drag while interacting with nodes
+        showTooltip(concept, e);
+      });
+      conceptElement.addEventListener('mouseout', hideTooltip);
+      conceptElement.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent drag while clicking nodes
+        showDetails(concept);
+      });
+
+      // Add touch event handlers
+      conceptElement.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      conceptElement.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+        hideTooltip();
+      });
+
+      document.getElementById('concept-map-container').appendChild(conceptElement);
+
+      // Update position after appending to account for actual size
+      setTimeout(() => {
+        conceptElement.style.left = `${x - conceptElement.offsetWidth / 2}px`;
+        conceptElement.style.top = `${y - conceptElement.offsetHeight / 2}px`;
+      }, 0);
+
+      return conceptElement;
+    }
+
+    // Function to create connection lines between concepts
+    function createConnection(x1, y1, x2, y2, type) {
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const angleRad = Math.atan2(y2 - y1, x2 - x1);
+
+      const connection = document.createElement('div');
+      connection.className = `connection ${type}`;
+      connection.style.width = `${length}px`;
+      connection.style.left = `${x1}px`;
+      connection.style.top = `${y1}px`;
+      connection.style.transform = `rotate(${angleRad}rad)`;
+
+      document.getElementById('concept-map-container').appendChild(connection);
+    }
+
+    // Function to show tooltip on hover
+    function showTooltip(concept, event) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = concept.description;
+      tooltip.style.left = `${event.pageX + 15}px`;
+      tooltip.style.top = `${event.pageY + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    // Function to hide tooltip
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Function to show concept details in side panel
+    function showDetails(concept) {
+      const detailPanel = document.getElementById('detail-panel');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      detailTitle.textContent = concept.name.replace(/\n/g, ' ');
+
+      // Create content with description and facts
+      let content = `<p>${concept.description}</p>`;
+
+      // Add facts
+      if (concept.facts && concept.facts.length > 0) {
+        content += `<h2>Key Facts</h2><div class="fact-list">`;
+        concept.facts.forEach(fact => {
+          content += `<div class="fact-item">• ${fact}</div>`;
+        });
+        content += `</div>`;
+      }
+
+      // Add relationships if they exist
+      if (concept.relationships && concept.relationships.length > 0) {
+        content += `<h2>Relationships</h2><div class="relationship-list">`;
+        concept.relationships.forEach(rel => {
+          const allConcepts = [...primaryConcepts, ...secondaryConcepts, ...tertiaryConcepts, centerConcept];
+          const relatedConcept = allConcepts.find(c => c.id === rel.to);
+          if (relatedConcept) {
+            let color;
+            switch (relatedConcept.type) {
+              case "primary-concept":
+                color = "#3f51b5";
+                break;
+              case "secondary-concept":
+                color = "#03a9f4";
+                break;
+              case "tertiary-concept":
+                color = "#4caf50";
+                break;
+              default:
+                color = "#9c27b0";
+                break;
+            }
+            content += `
+              <div class="relationship-item">
+                <div class="relationship-dot" style="background-color: ${color}"></div>
+                <span><b>${relatedConcept.name.replace(/\n/g, ' ')}</b>: ${rel.description}</span>
+              </div>`;
+          }
+        });
+        content += `</div>`;
+      }
+
+      detailContent.innerHTML = content;
+      detailPanel.style.display = 'block';
+    }
+
+    // Close detail panel
+    document.getElementById('detail-close').addEventListener('click', () => {
+      document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // ===================================
+    // DRAG / PAN FUNCTIONALITY
+    // ===================================
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleDragStart(e) {
+      // Don't drag if clicking on a concept node
+      if (e.target.classList.contains('concept')) return;
+
+      isDragging = true;
+
+      if (e.type === 'mousedown') {
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+
+      document.getElementById('concept-map-container').style.cursor = 'grabbing';
+    }
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      let currentClientX, currentClientY;
+
+      if (e.type === 'mousemove') {
+        currentClientX = e.clientX;
+        currentClientY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchmove') {
+        currentClientX = e.touches[0].clientX;
+        currentClientY = e.touches[0].clientY;
+        e.preventDefault();
+      }
+
+      const deltaX = currentClientX - startX;
+      const deltaY = currentClientY - startY;
+
+      currentX = offsetX + deltaX;
+      currentY = offsetY + deltaY;
+
+      const container = document.getElementById('concept-map-container');
+      container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+    }
+
+    function handleDragEnd() {
+      if (!isDragging) return;
+
+      isDragging = false;
+      offsetX = currentX;
+      offsetY = currentY;
+      document.getElementById('concept-map-container').style.cursor = 'move';
+    }
+
+    // Main function to initialize the concept map
+    function initializeConceptMap() {
+      const container = document.getElementById('concept-map-container');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Create center concept
+      createConcept(centerConcept, centerX, centerY);
+
+      // Create primary concepts
+      primaryConcepts.forEach(concept => {
+        const angleRad = concept.angle * (Math.PI / 180);
+        const x = centerX + Math.cos(angleRad) * concept.distance;
+        const y = centerY + Math.sin(angleRad) * concept.distance;
+
+        createConcept(concept, x, y);
+        createConnection(centerX, centerY, x, y, concept.connectionType);
+      });
+
+      // Create secondary concepts
+      secondaryConcepts.forEach(concept => {
+        const parent = primaryConcepts.find(p => p.id === concept.parentId);
+        if (parent) {
+          const parentAngleRad = parent.angle * (Math.PI / 180);
+          const parentX = centerX + Math.cos(parentAngleRad) * parent.distance;
+          const parentY = centerY + Math.sin(parentAngleRad) * parent.distance;
+
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType);
+        }
+      });
+
+      // Create tertiary concepts
+      tertiaryConcepts.forEach(concept => {
+        let parentX, parentY;
+        const parent = secondaryConcepts.find(p => p.id === concept.parentId);
+        
+        if (parent) {
+          const grandParent = primaryConcepts.find(p => p.id === parent.parentId);
+          if (grandParent) {
+            const grandParentAngleRad = grandParent.angle * (Math.PI / 180);
+            const grandParentX = centerX + Math.cos(grandParentAngleRad) * grandParent.distance;
+            const grandParentY = centerY + Math.sin(grandParentAngleRad) * grandParent.distance;
+
+            const parentAngleRad = parent.angle * (Math.PI / 180);
+            parentX = grandParentX + Math.cos(parentAngleRad) * parent.distance;
+            parentY = grandParentY + Math.sin(parentAngleRad) * parent.distance;
+          }
+        } else {
+          // If parent is a primary concept, not a secondary concept
+          const primaryParent = primaryConcepts.find(p => p.id === concept.parentId);
+          if (primaryParent) {
+            const parentAngleRad = primaryParent.angle * (Math.PI / 180);
+            parentX = centerX + Math.cos(parentAngleRad) * primaryParent.distance;
+            parentY = centerY + Math.sin(parentAngleRad) * primaryParent.distance;
+          }
+        }
+
+        if (parentX && parentY) {
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType);
+        }
+      });
+    }
+
+    // Initialize the concept map when the page loads
+    window.addEventListener('load', () => {
+      initializeConceptMap();
+
+      const container = document.getElementById('concept-map-container');
+      container.addEventListener('mousedown', handleDragStart);
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+
+      container.addEventListener('touchstart', handleDragStart, { passive: false });
+      window.addEventListener('touchmove', handleDrag, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+    });
+
+    // Handle window resize (rebuild map)
+    window.addEventListener('resize', () => {
+      offsetX = 0;
+      offsetY = 0;
+      currentX = 0;
+      currentY = 0;
+      document.getElementById('concept-map-container').innerHTML = '';
+      document.getElementById('concept-map-container').style.transform = '';
+      initializeConceptMap();
+    });
+  </script>
+</body>
+</html>
