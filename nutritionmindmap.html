@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinical Malnutrition Mind Map</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      overflow: hidden;
+      touch-action: none; /* Prevents browser handling of touch events */
+    }
+
+    #concept-map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      cursor: move;
+    }
+
+    .concept {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .center-concept {
+      background-color: #9c27b0;
+      width: 160px;
+      height: 160px;
+      font-size: 18px;
+      z-index: 20;
+    }
+
+    .primary-concept {
+      background-color: #3f51b5;
+      width: 120px;
+      height: 120px;
+      font-size: 14px;
+    }
+
+    .secondary-concept {
+      background-color: #03a9f4;
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+    }
+
+    .tertiary-concept {
+      background-color: #4caf50;
+      width: 70px;
+      height: 70px;
+      font-size: 11px;
+    }
+
+    .concept:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .connection {
+      position: absolute;
+      background-color: #7986cb;
+      z-index: 5;
+      transform-origin: left center;
+    }
+
+    .thick-connection {
+      height: 4px;
+    }
+
+    .medium-connection {
+      height: 3px;
+    }
+
+    .thin-connection {
+      height: 2px;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    #detail-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+      z-index: 30;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #detail-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    #detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #999;
+    }
+
+    #detail-close:hover {
+      color: #333;
+    }
+
+    .fact-list {
+      margin-top: 10px;
+    }
+
+    .fact-item {
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .relationship-list {
+      margin-top: 15px;
+    }
+
+    .relationship-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .relationship-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 25;
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #555;
+      z-index: 25;
+      max-width: 250px;
+    }
+
+    #main-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="concept-map-container"></div>
+
+  <div id="tooltip"></div>
+
+  <div id="detail-panel">
+    <div id="detail-close">×</div>
+    <div id="detail-title"></div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="title-overlay">
+    <h1 id="main-title">Clinical Malnutrition</h1>
+    <p id="subtitle">Interactive Mind Map</p>
+  </div>
+
+  <script>
+    // =========================
+    // DEFINE CONCEPTS & NODES
+    // =========================
+
+    // Center Concept
+    const centerConcept = {
+      id: "malnutrition",
+      name: "HOSPITAL\nMALNUTRITION",
+      type: "center-concept",
+      description: "Nutritional deficiency that affects 20-50% of hospitalized patients and significantly impacts clinical outcomes",
+      facts: [
+        "Affects 20-50% of hospitalized patients on admission",
+        "Often under-recognized and under-diagnosed",
+        "Higher prevalence (25-75%) in cancer patients",
+        "Associated with increased mortality, longer hospital stays, and higher costs"
+      ]
+    };
+
+    // PRIMARY Concepts
+    const primaryConcepts = [
+      {
+        id: "types",
+        name: "Types of\nMalnutrition",
+        type: "primary-concept",
+        angle: 0,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Three main classifications of malnutrition based on underlying causes and inflammation",
+        facts: [
+          "Starvation-related: chronic without inflammation (e.g., anorexia)",
+          "Chronic disease-related: mild to moderate inflammation (e.g., cancer, diabetes)",
+          "Disease/injury-related: severe acute inflammation (e.g., sepsis, burns, trauma)",
+          "Classification determines appropriate interventions and coding"
+        ],
+        relationships: []
+      },
+      {
+        id: "consequences",
+        name: "Clinical\nConsequences",
+        type: "primary-concept",
+        angle: 60,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Clinical impacts of malnutrition on body systems and function",
+        facts: [
+          "Increased infection rates and delayed wound healing",
+          "Reduced muscle function and physical capacity",
+          "Decreased cardiac and respiratory function",
+          "Impaired immune response and increased mortality"
+        ],
+        relationships: []
+      },
+      {
+        id: "assessment",
+        name: "Assessment\nMethods",
+        type: "primary-concept",
+        angle: 120,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Tools and techniques used to identify and diagnose malnutrition",
+        facts: [
+          "Admission screening required within 48 hours",
+          "Comprehensive nutrition assessment by dietitians",
+          "Nutrition Focused Physical Exam (NFPE)",
+          "Indirect calorimetry for precise energy needs"
+        ],
+        relationships: []
+      },
+      {
+        id: "coding",
+        name: "Diagnosis\n& Coding",
+        type: "primary-concept",
+        angle: 180,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Process for documenting malnutrition and its impact on hospital coding and reimbursement",
+        facts: [
+          "Dietitian assessment followed by physician signature",
+          "Moderate malnutrition is a CC code (Complication/Comorbidity)",
+          "Severe malnutrition is an MCC code (Major Complication/Comorbidity)",
+          "Proper documentation increases reimbursement by $1,400-$6,000"
+        ],
+        relationships: []
+      },
+      {
+        id: "interventions",
+        name: "Nutrition\nInterventions",
+        type: "primary-concept",
+        angle: 240,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Treatment strategies to address malnutrition in hospitalized patients",
+        facts: [
+          "Oral nutrition supplements and fortified foods",
+          "Enteral nutrition (tube feeding) for severely malnourished patients",
+          "Parenteral nutrition when GI tract is non-functional",
+          "Careful refeeding protocol for severe malnutrition"
+        ],
+        relationships: []
+      },
+      {
+        id: "outcomes",
+        name: "Hospital\nOutcomes",
+        type: "primary-concept",
+        angle: 300,
+        distance: 200,
+        connectionType: "thick-connection",
+        description: "Impact of malnutrition on hospital metrics and patient outcomes",
+        facts: [
+          "3.4× higher risk of in-hospital deaths",
+          "1.9× longer hospital stays",
+          "2× higher discharge rate to long-term care",
+          "$58 billion in associated hospital costs annually"
+        ],
+        relationships: []
+      }
+    ];
+
+    // SECONDARY Concepts
+    const secondaryConcepts = [
+      {
+        id: "starvation",
+        name: "Starvation\nRelated",
+        type: "secondary-concept",
+        parentId: "types",
+        angle: 345,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Malnutrition without significant inflammation, due to chronic inadequate intake",
+        facts: [
+          "Prolonged inadequate intake without inflammation",
+          "Examples include anorexia nervosa",
+          "May be seen in psychiatric patients or those with poor intake",
+          "Less common in hospitalized patients"
+        ]
+      },
+      {
+        id: "chronic-disease",
+        name: "Chronic\nDisease",
+        type: "secondary-concept",
+        parentId: "types",
+        angle: 15,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Malnutrition with mild to moderate inflammation associated with chronic conditions",
+        facts: [
+          "Mild to moderate inflammation present",
+          "Seen in cancer, diabetes, cardiovascular disease",
+          "Inflammatory cytokines affect metabolism",
+          "Often requires long-term nutritional support"
+        ]
+      },
+      {
+        id: "muscle-function",
+        name: "Muscle\nFatigue",
+        type: "secondary-concept",
+        parentId: "consequences",
+        angle: 45,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Loss of muscle function and strength due to malnutrition",
+        facts: [
+          "Reduced ability to perform activities of daily living",
+          "Decreased muscle mass and strength",
+          "Can lead to sarcopenia in elderly patients",
+          "Contributes to longer recovery times"
+        ]
+      },
+      {
+        id: "cardio-respiratory",
+        name: "Cardio-\nRespiratory",
+        type: "secondary-concept",
+        parentId: "consequences",
+        angle: 75,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Impact on heart and lung function due to malnutrition",
+        facts: [
+          "Reduced cardiac muscle mass and function",
+          "Decreased respiratory muscle strength",
+          "Inability to effectively clear secretions",
+          "Increased risk of pneumonia and respiratory infections"
+        ]
+      },
+      {
+        id: "nfpe",
+        name: "NFPE\nExam",
+        type: "secondary-concept",
+        parentId: "assessment",
+        angle: 105,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Nutrition Focused Physical Exam - evaluates muscle and fat wasting",
+        facts: [
+          "Assesses muscle and fat stores at specific body sites",
+          "Identifies micronutrient deficiencies",
+          "More objective than traditional assessment",
+          "Introduced in clinical practice around 2012"
+        ]
+      },
+      {
+        id: "screening",
+        name: "Admission\nScreening",
+        type: "secondary-concept",
+        parentId: "assessment",
+        angle: 135,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Initial screening process to identify patients at risk for malnutrition",
+        facts: [
+          "Required within 48 hours of admission",
+          "Modified MST (Malnutrition Screening Tool) used",
+          "Screens for recent weight loss and decreased intake",
+          "Triggers comprehensive assessment if positive"
+        ]
+      },
+      {
+        id: "icd-codes",
+        name: "ICD-10\nCodes",
+        type: "secondary-concept",
+        parentId: "coding",
+        angle: 165,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Diagnostic codes used for malnutrition documentation",
+        facts: [
+          "E44.0 - Moderate protein-calorie malnutrition (CC)",
+          "E43 - Severe protein-calorie malnutrition (MCC)",
+          "E46 - Unspecified protein-calorie malnutrition",
+          "R64 - Cachexia (often used in cancer patients)"
+        ]
+      },
+      {
+        id: "reimbursement",
+        name: "Hospital\nRevenue",
+        type: "secondary-concept",
+        parentId: "coding",
+        angle: 195,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Financial impact of proper malnutrition documentation",
+        facts: [
+          "GI obstruction: $4,400 → $5,700 with moderate malnutrition",
+          "Renal failure: $6,200 → $9,400 with severe malnutrition",
+          "Cirrhosis: $3,500 → $9,700 with severe malnutrition",
+          "Supports appropriate length of stay and resource allocation"
+        ]
+      },
+      {
+        id: "enteral",
+        name: "Enteral\nNutrition",
+        type: "secondary-concept",
+        parentId: "interventions",
+        angle: 225,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Tube feeding for patients unable to consume adequate oral nutrition",
+        facts: [
+          "Recommended within days for malnourished patients",
+          "Can wait 7-9 days for well-nourished patients",
+          "Various formulas available for specific conditions",
+          "Requires monitoring for tolerance and adequacy"
+        ]
+      },
+      {
+        id: "parenteral",
+        name: "Parenteral\nNutrition",
+        type: "secondary-concept",
+        parentId: "interventions",
+        angle: 255,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Intravenous nutrition when GI tract is non-functional",
+        facts: [
+          "Reserved for non-functional GI tract AND severe malnutrition",
+          "Typically initiated after 5-7 days if enteral not possible",
+          "Higher risk of infection and complications",
+          "Requires careful monitoring and adjustment"
+        ]
+      },
+      {
+        id: "length-stay",
+        name: "Length of\nStay",
+        type: "secondary-concept",
+        parentId: "outcomes",
+        angle: 285,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Impact of malnutrition on hospitalization duration",
+        facts: [
+          "1.9 times longer hospital stays",
+          "Significant impact on hospital capacity",
+          "Increased risk of hospital-acquired complications",
+          "Major driver of increased healthcare costs"
+        ]
+      },
+      {
+        id: "readmissions",
+        name: "Hospital\nReadmissions",
+        type: "secondary-concept",
+        parentId: "outcomes",
+        angle: 315,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Higher rates of readmission among malnourished patients",
+        facts: [
+          "Malnourished patients have higher 30-day readmission rates",
+          "Readmissions cost approximately $10,000 more",
+          "Improved nutrition interventions can reduce readmissions",
+          "Important quality metric for hospitals"
+        ]
+      }
+    ];
+
+    // TERTIARY Concepts
+    const tertiaryConcepts = [
+      {
+        id: "sarcopenia",
+        name: "Sarcopenia",
+        type: "tertiary-concept",
+        parentId: "muscle-function",
+        angle: 45,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Progressive loss of skeletal muscle mass and function",
+        facts: [
+          "Common in malnourished elderly patients",
+          "Accelerated by inflammatory conditions",
+          "Results in reduced functional capacity",
+          "Difficult to reverse once established"
+        ]
+      },
+      {
+        id: "thiamine",
+        name: "Thiamine\nDeficiency",
+        type: "tertiary-concept",
+        parentId: "cardio-respiratory",
+        angle: 75,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Vitamin B1 deficiency common in malnourished patients",
+        facts: [
+          "Critical for carbohydrate metabolism and energy production",
+          "Deficiency affects cardiac function",
+          "Must be repleted before refeeding begins",
+          "Can cause Wernicke's encephalopathy if untreated"
+        ]
+      },
+      {
+        id: "calorimetry",
+        name: "Indirect\nCalorimetry",
+        type: "tertiary-concept",
+        parentId: "nfpe",
+        angle: 105,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Method to determine energy expenditure in patients",
+        facts: [
+          "Measures oxygen consumption and carbon dioxide production",
+          "Determines resting energy expenditure",
+          "Useful for complex cases (very low or high BMI)",
+          "Guides precise nutritional prescription"
+        ]
+      },
+      {
+        id: "dehiscence",
+        name: "Wound\nDehiscence",
+        type: "tertiary-concept",
+        parentId: "length-stay",
+        angle: 285,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Wound separation commonly seen in malnourished surgical patients",
+        facts: [
+          "Significantly more common in malnourished patients",
+          "Delays recovery and extends hospitalization",
+          "Often requires surgical revision",
+          "Preventable with proper nutritional support"
+        ]
+      },
+      {
+        id: "appetite",
+        name: "Appetite\nStimulants",
+        type: "tertiary-concept",
+        parentId: "enteral",
+        angle: 225,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Medications used to improve oral intake in malnourished patients",
+        facts: [
+          "Megestrol acetate (Megace) commonly used",
+          "Dronabinol (Marinol) for cancer and AIDS patients",
+          "Used alongside nutritional counseling",
+          "Variable efficacy in clinical practice"
+        ]
+      }
+    ];
+
+    // ===================================
+    // REUSABLE FUNCTIONS & MAP CREATION
+    // ===================================
+
+    // Main function to initialize the concept map
+    function initializeConceptMap() {
+      const container = document.getElementById('concept-map-container');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Create center concept
+      createConcept(centerConcept, centerX, centerY);
+
+      // Create primary concepts
+      primaryConcepts.forEach(concept => {
+        const angleRad = concept.angle * (Math.PI / 180);
+        const x = centerX + Math.cos(angleRad) * concept.distance;
+        const y = centerY + Math.sin(angleRad) * concept.distance;
+
+        createConcept(concept, x, y);
+        createConnection(centerX, centerY, x, y, concept.connectionType, concept.angle);
+      });
+
+      // Create secondary concepts
+      secondaryConcepts.forEach(concept => {
+        const parent = primaryConcepts.find(p => p.id === concept.parentId);
+        if (parent) {
+          const parentAngleRad = parent.angle * (Math.PI / 180);
+          const parentX = centerX + Math.cos(parentAngleRad) * parent.distance;
+          const parentY = centerY + Math.sin(parentAngleRad) * parent.distance;
+
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+
+      // Create tertiary concepts
+      tertiaryConcepts.forEach(concept => {
+        let parentX, parentY;
+        const parent = secondaryConcepts.find(p => p.id === concept.parentId);
+        
+        if (parent) {
+          const grandParent = primaryConcepts.find(p => p.id === parent.parentId);
+          if (grandParent) {
+            const grandParentAngleRad = grandParent.angle * (Math.PI / 180);
+            const grandParentX = centerX + Math.cos(grandParentAngleRad) * grandParent.distance;
+            const grandParentY = centerY + Math.sin(grandParentAngleRad) * grandParent.distance;
+
+            const parentAngleRad = parent.angle * (Math.PI / 180);
+            parentX = grandParentX + Math.cos(parentAngleRad) * parent.distance;
+            parentY = grandParentY + Math.sin(parentAngleRad) * parent.distance;
+          }
+        } else {
+          // If parent is a primary concept, not a secondary concept
+          const primaryParent = primaryConcepts.find(p => p.id === concept.parentId);
+          if (primaryParent) {
+            const parentAngleRad = primaryParent.angle * (Math.PI / 180);
+            parentX = centerX + Math.cos(parentAngleRad) * primaryParent.distance;
+            parentY = centerY + Math.sin(parentAngleRad) * primaryParent.distance;
+          }
+        }
+
+        if (parentX && parentY) {
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+    }
+
+    // Function to create a concept node
+    function createConcept(concept, x, y) {
+      const conceptElement = document.createElement('div');
+      conceptElement.className = `concept ${concept.type}`;
+      conceptElement.id = concept.id;
+      conceptElement.textContent = concept.name;
+      conceptElement.style.left = `${x - (conceptElement.offsetWidth || 120) / 2}px`;
+      conceptElement.style.top = `${y - (conceptElement.offsetHeight || 120) / 2}px`;
+
+      // Add event listeners
+      conceptElement.addEventListener('mouseover', (e) => {
+        e.stopPropagation(); // Prevent drag while interacting with nodes
+        showTooltip(concept, e);
+      });
+      conceptElement.addEventListener('mouseout', hideTooltip);
+      conceptElement.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent drag while clicking nodes
+        showDetails(concept);
+      });
+
+      // Add touch event handlers
+      conceptElement.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      conceptElement.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+        hideTooltip();
+      });
+
+      document.getElementById('concept-map-container').appendChild(conceptElement);
+
+      // Update position after appending to account for actual size
+      setTimeout(() => {
+        conceptElement.style.left = `${x - conceptElement.offsetWidth / 2}px`;
+        conceptElement.style.top = `${y - conceptElement.offsetHeight / 2}px`;
+      }, 0);
+
+      return conceptElement;
+    }
+
+    // Function to create connection lines between concepts
+    function createConnection(x1, y1, x2, y2, type, angle) {
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const angleRad = Math.atan2(y2 - y1, x2 - x1);
+
+      const connection = document.createElement('div');
+      connection.className = `connection ${type}`;
+      connection.style.width = `${length}px`;
+      connection.style.left = `${x1}px`;
+      connection.style.top = `${y1}px`;
+      connection.style.transform = `rotate(${angleRad}rad)`;
+
+      document.getElementById('concept-map-container').appendChild(connection);
+    }
+
+    // Function to show tooltip on hover
+    function showTooltip(concept, event) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = concept.description;
+      tooltip.style.left = `${event.pageX + 15}px`;
+      tooltip.style.top = `${event.pageY + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    // Function to hide tooltip
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Function to show concept details in side panel
+    function showDetails(concept) {
+      const detailPanel = document.getElementById('detail-panel');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      detailTitle.textContent = concept.name;
+
+      // Create content with description and facts
+      let content = `<p>${concept.description}</p>`;
+
+      // Add facts
+      if (concept.facts && concept.facts.length > 0) {
+        content += `<h2>Key Facts</h2><div class="fact-list">`;
+        concept.facts.forEach(fact => {
+          content += `<div class="fact-item">• ${fact}</div>`;
+        });
+        content += `</div>`;
+      }
+
+      // Add relationships if they exist
+      if (concept.relationships && concept.relationships.length > 0) {
+        content += `<h2>Relationships</h2><div class="relationship-list">`;
+        concept.relationships.forEach(rel => {
+          const allConcepts = [...primaryConcepts, ...secondaryConcepts, ...tertiaryConcepts, centerConcept];
+          const relatedConcept = allConcepts.find(c => c.id === rel.to);
+          if (relatedConcept) {
+            let color;
+            switch (relatedConcept.type) {
+              case "primary-concept":
+                color = "#3f51b5";
+                break;
+              case "secondary-concept":
+                color = "#03a9f4";
+                break;
+              case "tertiary-concept":
+                color = "#4caf50";
+                break;
+              default:
+                color = "#9c27b0";
+                break;
+            }
+            content += `
+              <div class="relationship-item">
+                <div class="relationship-dot" style="background-color: ${color}"></div>
+                <span><b>${relatedConcept.name}</b>: ${rel.description}</span>
+              </div>`;
+          }
+        });
+        content += `</div>`;
+      }
+
+      detailContent.innerHTML = content;
+      detailPanel.style.display = 'block';
+    }
+
+    // Close detail panel
+    document.getElementById('detail-close').addEventListener('click', () => {
+      document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // ===================================
+    // DRAG / PAN FUNCTIONALITY
+    // ===================================
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleDragStart(e) {
+      // Don't drag if clicking on a concept node
+      if (e.target.classList.contains('concept')) return;
+
+      isDragging = true;
+
+      if (e.type === 'mousedown') {
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+
+      document.getElementById('concept-map-container').style.cursor = 'grabbing';
+    }
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      let currentClientX, currentClientY;
+
+      if (e.type === 'mousemove') {
+        currentClientX = e.clientX;
+        currentClientY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchmove') {
+        currentClientX = e.touches[0].clientX;
+        currentClientY = e.currentClientY = e.touches[0].clientY;
+       e.preventDefault();
+     }
+
+     const deltaX = currentClientX - startX;
+     const deltaY = currentClientY - startY;
+
+     currentX = offsetX + deltaX;
+     currentY = offsetY + deltaY;
+
+     const container = document.getElementById('concept-map-container');
+     container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+   }
+
+   function handleDragEnd() {
+     if (!isDragging) return;
+
+     isDragging = false;
+     offsetX = currentX;
+     offsetY = currentY;
+     document.getElementById('concept-map-container').style.cursor = 'move';
+   }
+
+   // Initialize the concept map when the page loads
+   window.addEventListener('load', () => {
+     initializeConceptMap();
+
+     const container = document.getElementById('concept-map-container');
+     container.addEventListener('mousedown', handleDragStart);
+     window.addEventListener('mousemove', handleDrag);
+     window.addEventListener('mouseup', handleDragEnd);
+
+     container.addEventListener('touchstart', handleDragStart, { passive: false });
+     window.addEventListener('touchmove', handleDrag, { passive: false });
+     window.addEventListener('touchend', handleDragEnd);
+   });
+
+   // Handle window resize (rebuild map)
+   window.addEventListener('resize', () => {
+     offsetX = 0;
+     offsetY = 0;
+     currentX = 0;
+     currentY = 0;
+     document.getElementById('concept-map-container').innerHTML = '';
+     document.getElementById('concept-map-container').style.transform = '';
+     initializeConceptMap();
+   });
+ </script>
+</body>
+</html>
