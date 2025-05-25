@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinical Malnutrition Mind Map</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      overflow: hidden;
+      touch-action: none; /* Prevents browser handling of touch events */
+    }
+
+    #concept-map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      cursor: move;
+    }
+
+    .concept {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .center-concept {
+      background-color: #9c27b0;
+      width: 160px;
+      height: 160px;
+      font-size: 18px;
+      z-index: 20;
+    }
+
+    .primary-concept {
+      background-color: #3f51b5;
+      width: 120px;
+      height: 120px;
+      font-size: 14px;
+    }
+
+    .secondary-concept {
+      background-color: #03a9f4;
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+    }
+
+    .tertiary-concept {
+      background-color: #4caf50;
+      width: 70px;
+      height: 70px;
+      font-size: 11px;
+    }
+
+    .concept:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .connection {
+      position: absolute;
+      background-color: #7986cb;
+      z-index: 5;
+      transform-origin: left center;
+    }
+
+    .thick-connection {
+      height: 4px;
+    }
+
+    .medium-connection {
+      height: 3px;
+    }
+
+    .thin-connection {
+      height: 2px;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    #detail-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+      z-index: 30;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #detail-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    #detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #999;
+    }
+
+    #detail-close:hover {
+      color: #333;
+    }
+
+    .fact-list {
+      margin-top: 10px;
+    }
+
+    .fact-item {
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .relationship-list {
+      margin-top: 15px;
+    }
+
+    .relationship-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .relationship-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 25;
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #555;
+      z-index: 25;
+      max-width: 250px;
+    }
+
+    #main-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="concept-map-container"></div>
+
+  <div id="tooltip"></div>
+
+  <div id="detail-panel">
+    <div id="detail-close">×</div>
+    <div id="detail-title"></div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="title-overlay">
+    <h1 id="main-title">Clinical Malnutrition</h1>
+    <p id="subtitle">Interactive Mind Map</p>
+  </div>
+
+  <script>
+    // =========================
+// DEFINE CONCEPTS & NODES
+// =========================
+
+// Center Concept
+const centerConcept = {
+  id: "hemodialysis-access",
+  name: "HEMODIALYSIS\nACCESS",
+  type: "center-concept",
+  description: "The critical lifeline for patients with end-stage kidney disease requiring hemodialysis, covering its past, present, and future considerations.",
+  facts: [
+    "Lifeline for most ESKD patients.",
+    "Evolution from 1940s (Kolf) to modern techniques.",
+    "Focus on individualized 'Life Plan' (KDOQI 2019).",
+    "Involves collaboration between multiple medical teams."
+  ]
+};
+
+// PRIMARY Concepts
+const primaryConcepts = [
+  {
+    id: "access-types",
+    name: "Access\nTypes",
+    type: "primary-concept",
+    angle: 0, // Top-right
+    distance: 220,
+    connectionType: "thick-connection",
+    description: "Different methods and conduits used to connect a patient's bloodstream to the hemodialysis machine.",
+    facts: [
+      "Includes AV Fistulas (AVF), AV Grafts (AVG), and Tunnelled Dialysis Catheters (TDC).",
+      "Choice depends on patient anatomy, urgency, and 'Life Plan'.",
+      "Each type has distinct advantages and disadvantages."
+    ],
+    relationships: []
+  },
+  {
+    id: "guidelines-evolution",
+    name: "Guidelines\n& Evolution",
+    type: "primary-concept",
+    angle: 60, // Right
+    distance: 220,
+    connectionType: "thick-connection",
+    description: "The shift in clinical recommendations from 'Fistula First' to a more patient-centered approach.",
+    facts: [
+      "KDOQI 2006: Strong 'Fistula First' emphasis.",
+      "KDOQI 2019: Introduced the 'Life Plan' concept, individualized care.",
+      "Driven by re-evaluation of evidence and selection bias concerns.",
+      "Recognizes legitimate roles for AVGs and TDCs."
+    ],
+    relationships: []
+  },
+  {
+    id: "complications",
+    name: "Common\nComplications",
+    type: "primary-concept",
+    angle: 120, // Bottom-right
+    distance: 220,
+    connectionType: "thick-connection",
+    description: "Adverse events and dysfunctions that can occur with hemodialysis access, requiring intervention.",
+    facts: [
+      "Stenosis (narrowing) is a major issue.",
+      "Thrombosis (clotting) leads to access failure.",
+      "Infection is a significant risk, especially with TDCs and AVGs.",
+      "Ischemic Steal Syndrome and Pseudoaneurysms also occur."
+    ],
+    relationships: []
+  },
+  {
+    id: "assessment-maintenance",
+    name: "Assessment &\nMaintenance",
+    type: "primary-concept",
+    angle: 180, // Bottom-left
+    distance: 220,
+    connectionType: "thick-connection",
+    description: "Clinical evaluation and ongoing care required to ensure functional and patent hemodialysis access.",
+    facts: [
+      "Pre-operative assessment includes vessel mapping (duplex ultrasound).",
+      "Physical exam: thrill, bruit, signs of infection/steal.",
+      "Surveillance for stenosis and timely intervention (e.g., angioplasty).",
+      "Proper cannulation techniques are vital (e.g., rope ladder)."
+    ],
+    relationships: []
+  },
+  {
+    id: "future-innovations",
+    name: "Future &\nInnovations",
+    type: "primary-concept",
+    angle: 240, // Left
+    distance: 220,
+    connectionType: "thick-connection",
+    description: "Emerging technologies and materials aimed at improving hemodialysis access outcomes.",
+    facts: [
+      "Endovascular AVF (endoAVF) creation.",
+      "Newer graft materials (e.g., bovine, early-access, drug-eluting).",
+      "Bioengineered vessels (e.g., Humacyte).",
+      "Improved cannulation (e.g., ultrasound-guided, less traumatic needles)."
+    ],
+    relationships: []
+  },
+  {
+    id: "historical-context",
+    name: "Historical\nContext",
+    type: "primary-concept",
+    angle: 300, // Top-left
+    distance: 220,
+    connectionType: "thick-connection",
+    description: "Key milestones in the development of hemodialysis access from early attempts to established procedures.",
+    facts: [
+      "Dr. Kolf (1940s): Early hemodialysis for acute renal failure.",
+      "Quinton-Scribner Shunt (1960s): First chronic access.",
+      "Brescia-Cimino Fistula (1960s): Landmark internal AVF.",
+      "Development of PTFE grafts (1970s)."
+    ],
+    relationships: []
+  }
+];
+
+// SECONDARY Concepts
+const secondaryConcepts = [
+  // --- Access Types Children ---
+  {
+    id: "av-fistula",
+    name: "AV Fistula\n(AVF)",
+    type: "secondary-concept",
+    parentId: "access-types",
+    angle: 330,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Direct connection between an artery and a vein, using patient's own vessels.",
+    facts: ["Generally best long-term patency and lowest infection.", "Requires maturation time.", "Examples: Radiocephalic, Brachiocephalic."]
+  },
+  {
+    id: "av-graft",
+    name: "AV Graft\n(AVG)",
+    type: "secondary-concept",
+    parentId: "access-types",
+    angle: 0,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Synthetic tube connecting an artery to a vein.",
+    facts: ["Used when native veins are unsuitable.", "Higher stenosis/thrombosis/infection than AVF.", "Examples: PTFE, Bovine, Early-Access."]
+  },
+  {
+    id: "tdc",
+    name: "Tunnelled Dialysis\nCatheter (TDC)",
+    type: "secondary-concept",
+    parentId: "access-types",
+    angle: 30,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Catheter placed into a large central vein, tunneled under the skin.",
+    facts: ["Immediate use.", "Highest infection and central venous stenosis risk.", "For urgent starts or no other options."]
+  },
+  // --- Guidelines Children ---
+  {
+    id: "fistula-first",
+    name: "Fistula First\n(KDOQI 2006)",
+    type: "secondary-concept",
+    parentId: "guidelines-evolution",
+    angle: 45,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Previous dominant guideline emphasizing AVF as the primary choice.",
+    facts: ["Based on observational data showing better AVF outcomes.", "Led to significant efforts to increase AVF rates."]
+  },
+  {
+    id: "life-plan",
+    name: "Life Plan\n(KDOQI 2019)",
+    type: "secondary-concept",
+    parentId: "guidelines-evolution",
+    angle: 75,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Current guideline advocating for individualized, patient-centered access planning.",
+    facts: ["Considers patient's overall health, life expectancy, anatomy, preferences.", "Recognizes limitations of 'Fistula First' for all."]
+  },
+  // --- Complications Children ---
+  {
+    id: "stenosis-comp",
+    name: "Stenosis",
+    type: "secondary-concept",
+    parentId: "complications",
+    angle: 105,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Narrowing of the access, typically at venous anastomosis or within the access.",
+    facts: ["Common in AVGs.", "Leads to poor flow, high pressures.", "Treated with angioplasty/stenting."]
+  },
+  {
+    id: "thrombosis-comp",
+    name: "Thrombosis",
+    type: "secondary-concept",
+    parentId: "complications",
+    angle: 135,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Clot formation within the access, leading to failure.",
+    facts: ["Requires urgent intervention (thrombectomy).", "Often due to underlying stenosis."]
+  },
+  {
+    id: "infection-comp",
+    name: "Infection",
+    type: "secondary-concept",
+    parentId: "complications",
+    angle: 165,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Bacterial contamination of the access, can lead to sepsis.",
+    facts: ["Highest risk with TDCs.", "AVGs more prone than AVFs.", "Requires antibiotics, possible access removal."]
+  },
+  // --- Assessment/Maintenance Children ---
+   {
+    id: "vessel-mapping",
+    name: "Vessel\nMapping",
+    type: "secondary-concept",
+    parentId: "assessment-maintenance",
+    angle: 195,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Pre-operative ultrasound to assess artery and vein suitability.",
+    facts: ["Measures vessel diameter and depth.", "Identifies potential issues like stenosis or calcification."]
+  },
+  {
+    id: "cannulation-tech",
+    name: "Cannulation\nTechniques",
+    type: "secondary-concept",
+    parentId: "assessment-maintenance",
+    angle: 225,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Methods for inserting needles into the access for dialysis.",
+    facts: ["Rope-ladder technique preferred to avoid pseudoaneurysms.", "Buttonhole technique has higher infection risk.", "Ultrasound guidance emerging."]
+  },
+  // --- Future/Innovations Children ---
+  {
+    id: "endo-avf",
+    name: "EndoAVF",
+    type: "secondary-concept",
+    parentId: "future-innovations",
+    angle: 255,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Percutaneously created AVF using catheters (e.g., WavelinQ, Ellipsys).",
+    facts: ["Minimally invasive.", "Requires post-creation procedures for maturation.", "Specific anatomical criteria."]
+  },
+  {
+    id: "newer-grafts",
+    name: "Newer Graft\nMaterials",
+    type: "secondary-concept",
+    parentId: "future-innovations",
+    angle: 285,
+    distance: 150,
+    connectionType: "medium-connection",
+    description: "Advancements in graft technology beyond standard PTFE.",
+    facts: ["Early-access grafts (e.g., Acuseal).", "Biologic grafts (e.g., Bovine carotid).", "Drug-eluting grafts (investigational)."]
+  }
+];
+
+// TERTIARY Concepts (Examples - you'll need to expand significantly)
+const tertiaryConcepts = [
+  // --- AVF Children ---
+  {
+    id: "radiocephalic-avf",
+    name: "Radiocephalic\nAVF (Wrist)",
+    type: "tertiary-concept",
+    parentId: "av-fistula",
+    angle: 315,
+    distance: 120,
+    connectionType: "thin-connection",
+    description: "Classic Brescia-Cimino fistula at the wrist.",
+    facts: ["Often first choice.", "Preserves more proximal vessels.", "May have lower flow rates initially."]
+  },
+  {
+    id: "brachiocephalic-avf",
+    name: "Brachiocephalic\nAVF (Elbow)",
+    type: "tertiary-concept",
+    parentId: "av-fistula",
+    angle: 345,
+    distance: 120,
+    connectionType: "thin-connection",
+    description: "AVF created at the antecubital fossa.",
+    facts: ["Higher flow rates typically.", "Uses larger vessels."]
+  },
+  // --- AVG Children ---
+  {
+    id: "ptfe-graft",
+    name: "PTFE Graft",
+    type: "tertiary-concept",
+    parentId: "av-graft",
+    angle: 15,
+    distance: 120,
+    connectionType: "thin-connection",
+    description: "Standard synthetic graft made of Polytetrafluoroethylene.",
+    facts: ["Commonly used.", "Available in various configurations (loop, straight)."]
+  },
+  // --- Stenosis Children ---
+  {
+    id: "central-venous-sten",
+    name: "Central Venous\nStenosis",
+    type: "tertiary-concept",
+    parentId: "stenosis-comp",
+    angle: 90,
+    distance: 120,
+    connectionType: "thin-connection",
+    description: "Narrowing of large veins leading to the heart (e.g., subclavian, innominate).",
+    facts: ["Often caused by prior catheters.", "Can cause significant arm/facial swelling.", "May require HERO graft."]
+  },
+  {
+    id: "hero-graft",
+    name: "HERO Graft",
+    type: "tertiary-concept",
+    parentId: "central-venous-sten", // Or directly under Complications if preferred
+    angle: 75,
+    distance: 90,
+    connectionType: "thin-connection",
+    description: "Hemodialysis Reliable Outflow graft for patients with central venous occlusion.",
+    facts: ["Hybrid device: graft component + venous outflow catheter.", "Bypasses central obstruction."]
+  },
+  // --- Historical Context Children ---
+  {
+    id: "brescia-cimino",
+    name: "Brescia-Cimino\nFistula",
+    type: "tertiary-concept",
+    parentId: "historical-context",
+    angle: 285,
+    distance: 120,
+    connectionType: "thin-connection",
+    description: "The first successful internal arteriovenous fistula for chronic hemodialysis.",
+    facts: ["Developed in the 1960s.", "Revolutionized chronic dialysis access."]
+  }
+];
+
+    // ===================================
+    // REUSABLE FUNCTIONS & MAP CREATION
+    // ===================================
+
+    // Main function to initialize the concept map
+    function initializeConceptMap() {
+      const container = document.getElementById('concept-map-container');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Create center concept
+      createConcept(centerConcept, centerX, centerY);
+
+      // Create primary concepts
+      primaryConcepts.forEach(concept => {
+        const angleRad = concept.angle * (Math.PI / 180);
+        const x = centerX + Math.cos(angleRad) * concept.distance;
+        const y = centerY + Math.sin(angleRad) * concept.distance;
+
+        createConcept(concept, x, y);
+        createConnection(centerX, centerY, x, y, concept.connectionType, concept.angle);
+      });
+
+      // Create secondary concepts
+      secondaryConcepts.forEach(concept => {
+        const parent = primaryConcepts.find(p => p.id === concept.parentId);
+        if (parent) {
+          const parentAngleRad = parent.angle * (Math.PI / 180);
+          const parentX = centerX + Math.cos(parentAngleRad) * parent.distance;
+          const parentY = centerY + Math.sin(parentAngleRad) * parent.distance;
+
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+
+      // Create tertiary concepts
+      tertiaryConcepts.forEach(concept => {
+        let parentX, parentY;
+        const parent = secondaryConcepts.find(p => p.id === concept.parentId);
+        
+        if (parent) {
+          const grandParent = primaryConcepts.find(p => p.id === parent.parentId);
+          if (grandParent) {
+            const grandParentAngleRad = grandParent.angle * (Math.PI / 180);
+            const grandParentX = centerX + Math.cos(grandParentAngleRad) * grandParent.distance;
+            const grandParentY = centerY + Math.sin(grandParentAngleRad) * grandParent.distance;
+
+            const parentAngleRad = parent.angle * (Math.PI / 180);
+            parentX = grandParentX + Math.cos(parentAngleRad) * parent.distance;
+            parentY = grandParentY + Math.sin(parentAngleRad) * parent.distance;
+          }
+        } else {
+          // If parent is a primary concept, not a secondary concept
+          const primaryParent = primaryConcepts.find(p => p.id === concept.parentId);
+          if (primaryParent) {
+            const parentAngleRad = primaryParent.angle * (Math.PI / 180);
+            parentX = centerX + Math.cos(parentAngleRad) * primaryParent.distance;
+            parentY = centerY + Math.sin(parentAngleRad) * primaryParent.distance;
+          }
+        }
+
+        if (parentX && parentY) {
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+    }
+
+    // Function to create a concept node
+    function createConcept(concept, x, y) {
+      const conceptElement = document.createElement('div');
+      conceptElement.className = `concept ${concept.type}`;
+      conceptElement.id = concept.id;
+      conceptElement.textContent = concept.name;
+      conceptElement.style.left = `${x - (conceptElement.offsetWidth || 120) / 2}px`;
+      conceptElement.style.top = `${y - (conceptElement.offsetHeight || 120) / 2}px`;
+
+      // Add event listeners
+      conceptElement.addEventListener('mouseover', (e) => {
+        e.stopPropagation(); // Prevent drag while interacting with nodes
+        showTooltip(concept, e);
+      });
+      conceptElement.addEventListener('mouseout', hideTooltip);
+      conceptElement.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent drag while clicking nodes
+        showDetails(concept);
+      });
+
+      // Add touch event handlers
+      conceptElement.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      conceptElement.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+        hideTooltip();
+      });
+
+      document.getElementById('concept-map-container').appendChild(conceptElement);
+
+      // Update position after appending to account for actual size
+      setTimeout(() => {
+        conceptElement.style.left = `${x - conceptElement.offsetWidth / 2}px`;
+        conceptElement.style.top = `${y - conceptElement.offsetHeight / 2}px`;
+      }, 0);
+
+      return conceptElement;
+    }
+
+    // Function to create connection lines between concepts
+    function createConnection(x1, y1, x2, y2, type, angle) {
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const angleRad = Math.atan2(y2 - y1, x2 - x1);
+
+      const connection = document.createElement('div');
+      connection.className = `connection ${type}`;
+      connection.style.width = `${length}px`;
+      connection.style.left = `${x1}px`;
+      connection.style.top = `${y1}px`;
+      connection.style.transform = `rotate(${angleRad}rad)`;
+
+      document.getElementById('concept-map-container').appendChild(connection);
+    }
+
+    // Function to show tooltip on hover
+    function showTooltip(concept, event) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = concept.description;
+      tooltip.style.left = `${event.pageX + 15}px`;
+      tooltip.style.top = `${event.pageY + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    // Function to hide tooltip
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Function to show concept details in side panel
+    function showDetails(concept) {
+      const detailPanel = document.getElementById('detail-panel');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      detailTitle.textContent = concept.name;
+
+      // Create content with description and facts
+      let content = `<p>${concept.description}</p>`;
+
+      // Add facts
+      if (concept.facts && concept.facts.length > 0) {
+        content += `<h2>Key Facts</h2><div class="fact-list">`;
+        concept.facts.forEach(fact => {
+          content += `<div class="fact-item">• ${fact}</div>`;
+        });
+        content += `</div>`;
+      }
+
+      // Add relationships if they exist
+      if (concept.relationships && concept.relationships.length > 0) {
+        content += `<h2>Relationships</h2><div class="relationship-list">`;
+        concept.relationships.forEach(rel => {
+          const allConcepts = [...primaryConcepts, ...secondaryConcepts, ...tertiaryConcepts, centerConcept];
+          const relatedConcept = allConcepts.find(c => c.id === rel.to);
+          if (relatedConcept) {
+            let color;
+            switch (relatedConcept.type) {
+              case "primary-concept":
+                color = "#3f51b5";
+                break;
+              case "secondary-concept":
+                color = "#03a9f4";
+                break;
+              case "tertiary-concept":
+                color = "#4caf50";
+                break;
+              default:
+                color = "#9c27b0";
+                break;
+            }
+            content += `
+              <div class="relationship-item">
+                <div class="relationship-dot" style="background-color: ${color}"></div>
+                <span><b>${relatedConcept.name}</b>: ${rel.description}</span>
+              </div>`;
+          }
+        });
+        content += `</div>`;
+      }
+
+      detailContent.innerHTML = content;
+      detailPanel.style.display = 'block';
+    }
+
+    // Close detail panel
+    document.getElementById('detail-close').addEventListener('click', () => {
+      document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // ===================================
+    // DRAG / PAN FUNCTIONALITY
+    // ===================================
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleDragStart(e) {
+      // Don't drag if clicking on a concept node
+      if (e.target.classList.contains('concept')) return;
+
+      isDragging = true;
+
+      if (e.type === 'mousedown') {
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+
+      document.getElementById('concept-map-container').style.cursor = 'grabbing';
+    }
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      let currentClientX, currentClientY;
+
+      if (e.type === 'mousemove') {
+        currentClientX = e.clientX;
+        currentClientY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchmove') {
+        currentClientX = e.touches[0].clientX;
+        currentClientY = e.currentClientY = e.touches[0].clientY;
+       e.preventDefault();
+     }
+
+     const deltaX = currentClientX - startX;
+     const deltaY = currentClientY - startY;
+
+     currentX = offsetX + deltaX;
+     currentY = offsetY + deltaY;
+
+     const container = document.getElementById('concept-map-container');
+     container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+   }
+
+   function handleDragEnd() {
+     if (!isDragging) return;
+
+     isDragging = false;
+     offsetX = currentX;
+     offsetY = currentY;
+     document.getElementById('concept-map-container').style.cursor = 'move';
+   }
+
+   // Initialize the concept map when the page loads
+   window.addEventListener('load', () => {
+     initializeConceptMap();
+
+     const container = document.getElementById('concept-map-container');
+     container.addEventListener('mousedown', handleDragStart);
+     window.addEventListener('mousemove', handleDrag);
+     window.addEventListener('mouseup', handleDragEnd);
+
+     container.addEventListener('touchstart', handleDragStart, { passive: false });
+     window.addEventListener('touchmove', handleDrag, { passive: false });
+     window.addEventListener('touchend', handleDragEnd);
+   });
+
+   // Handle window resize (rebuild map)
+   window.addEventListener('resize', () => {
+     offsetX = 0;
+     offsetY = 0;
+     currentX = 0;
+     currentY = 0;
+     document.getElementById('concept-map-container').innerHTML = '';
+     document.getElementById('concept-map-container').style.transform = '';
+     initializeConceptMap();
+   });
+ </script>
+</body>
+</html>

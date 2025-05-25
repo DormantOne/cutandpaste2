@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hemodialysis Access Prompts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: left;
+            padding: 20px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .copyButton {
+            padding: 10px 20px;
+            background-color: #007bff; /* Blue for hemodialysis theme */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+        .copyButton:hover {
+            background-color: #0056b3;
+        }
+        .copyButton.copied {
+            background-color: #004085;
+        }
+        .promptText {
+            font-size: 12px;
+            color: #555;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e6f2ff; /* Lighter blue */
+            border: 1px solid #b3d7ff;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            margin-bottom: 30px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul li {
+            margin-bottom: 8px;
+        }
+        ul li a {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+        ul li a:hover {
+            text-decoration: underline;
+        }
+        #clearCacheButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        #clearCacheButton:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hemodialysis Access Prompts</h1>
+    <p>Copy and paste these prompts into any AI chatbot for in-depth analysis:</p>
+
+    <h2>Hemodialysis Access Types: Overview and Complications</h2>
+    <button id="copyButton1" class="copyButton" aria-label="Copy Hemodialysis Access Prompt to Clipboard">Copy Hemodialysis Access Prompt to Clipboard</button>
+
+    <div id="promptText1" class="promptText">
+Please provide a detailed overview of the following 9 hemodialysis access types:
+
+1.  Radiocephalic AV Fistula (Wrist)
+2.  Brachiocephalic AV Fistula (Elbow)
+3.  Basilic Vein Transposition AV Fistula
+4.  PTFE Forearm Loop Graft
+5.  PTFE Upper Arm Straight/Curved Graft
+6.  Early-Access/Rapid-Cannulation AVG (e.g., Acuseal, Flixene)
+7.  Bovine Carotid Artery Graft
+8.  Endovascular AV Fistula (endoAVF - e.g., WavelinQ, Ellipsys)
+9.  HERO (Hemodialysis Reliable Outflow) Graft
+
+For each of these 9 access types, describe:
+
+1.  The typical surgical/percutaneous creation technique and relevant anatomical vessels involved.
+2.  Its main advantages or pros.
+3.  Its main disadvantages or cons, including common complications.
+4.  The patient populations or clinical scenarios for which it is generally most suitable.
+5.  Key physical exam findings to recognize a well-functioning example of this access.
+6.  Clinical signs and symptoms that suggest common complications are occurring with this specific access.
+    </div>
+
+    <h2>Use with your favorite AI chatbot:</h2>
+    <ul>
+        <li><a href="https://www.bing.com/chat" target="_blank">Microsoft Copilot</a></li>
+        <li><a href="https://chat.openai.com/" target="_blank">ChatGPT by OpenAI</a></li>
+        <li><a href="https://claude.ai/" target="_blank">Claude by Anthropic</a></li>
+        <li><a href="https://gemini.google.com/" target="_blank">Gemini</a></li>
+        <li><a href="https://www.perplexity.ai/" target="_blank">Perplexity AI</a></li>
+        <li><a href="https://www.openevidence.com/" target="_blank">Open Evidence</a></li>
+        <li><a href="https://chat.deepseek.com/" target="_blank">DeepSeek</a></li>
+    </ul>
+
+    <button id="clearCacheButton">Clear Cache / Memory</button>
+
+    <script>
+        const hemodialysisPrompt = document.getElementById('promptText1').textContent.trim();
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            } else {
+                return new Promise((resolve, reject) => {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed";
+                    textArea.style.top = "0";
+                    textArea.style.left = "0";
+                    textArea.style.width = "2em";
+                    textArea.style.height = "2em";
+                    textArea.style.padding = "0";
+                    textArea.style.border = "none";
+                    textArea.style.outline = "none";
+                    textArea.style.boxShadow = "none";
+                    textArea.style.background = "transparent";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        resolve();
+                    } catch (err) {
+                        document.body.removeChild(textArea);
+                        reject(err);
+                    }
+                });
+            }
+        }
+
+        document.getElementById('copyButton1').addEventListener('click', () => {
+            copyToClipboard(hemodialysisPrompt).then(() => {
+                const copyBtn = document.getElementById('copyButton1');
+                copyBtn.innerText = "Copied!";
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.innerText = "Copy Hemodialysis Access Prompt to Clipboard";
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        document.getElementById('clearCacheButton').addEventListener('click', () => {
+            localStorage.clear();
+            const clearBtn = document.getElementById('clearCacheButton');
+            clearBtn.innerText = "Cleared!";
+            clearBtn.disabled = true;
+            setTimeout(() => {
+                clearBtn.innerText = "Clear Cache / Memory";
+                clearBtn.disabled = false;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
