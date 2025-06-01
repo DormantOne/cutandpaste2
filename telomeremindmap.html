@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Telomere Disease in Lung Transplant - Interactive Mind Map</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #concept-map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      cursor: move;
+    }
+
+    .concept {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .center-concept {
+      background-color: #9c27b0;
+      width: 180px;
+      height: 180px;
+      font-size: 18px;
+      z-index: 20;
+    }
+
+    .primary-concept {
+      background-color: #3f51b5;
+      width: 120px;
+      height: 120px;
+      font-size: 14px;
+    }
+
+    .secondary-concept {
+      background-color: #03a9f4;
+      width: 90px;
+      height: 90px;
+      font-size: 12px;
+    }
+
+    .tertiary-concept {
+      background-color: #4caf50;
+      width: 70px;
+      height: 70px;
+      font-size: 11px;
+    }
+
+    .concept:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .connection {
+      position: absolute;
+      background-color: #7986cb;
+      z-index: 5;
+      transform-origin: left center;
+    }
+
+    .thick-connection {
+      height: 4px;
+    }
+
+    .medium-connection {
+      height: 3px;
+    }
+
+    .thin-connection {
+      height: 2px;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+      z-index: 100;
+    }
+
+    #detail-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 350px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: none;
+      z-index: 30;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #detail-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    #detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #999;
+    }
+
+    #detail-close:hover {
+      color: #333;
+    }
+
+    .fact-list {
+      margin-top: 10px;
+    }
+
+    .fact-item {
+      background-color: #f5f5f5;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    #title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 25;
+    }
+
+    #instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #555;
+      z-index: 25;
+      max-width: 250px;
+    }
+
+    #main-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="concept-map-container"></div>
+
+  <div id="tooltip"></div>
+
+  <div id="detail-panel">
+    <div id="detail-close">×</div>
+    <div id="detail-title"></div>
+    <div id="detail-content"></div>
+  </div>
+
+  <div id="title-overlay">
+    <h1 id="main-title">Telomere Disease in Lung Transplant</h1>
+    <p id="subtitle">Interactive Clinical Mind Map</p>
+  </div>
+
+  <div id="instructions">
+    Click nodes for details<br>
+    Drag to pan the map<br>
+    Based on UPMC Grand Rounds 2025
+  </div>
+
+  <script>
+    // Center Concept
+    const centerConcept = {
+      id: "telomere-disease-transplant",
+      name: "TELOMERE DISEASE\nIN LUNG\nTRANSPLANT",
+      type: "center-concept",
+      description: "A systemic genetic syndrome affecting multiple organ systems in lung transplant recipients with IPF",
+      facts: [
+        "60% of IPF patients have telomeres below 10th percentile",
+        "25% carry pathogenic telomere gene variants",
+        "Requires fundamentally different management approach",
+        "Transforms IPF from terminal lung disease to manageable genetic syndrome"
+      ]
+    };
+
+    // PRIMARY Concepts
+    const primaryConcepts = [
+      {
+        id: "telomere-biology",
+        name: "Telomere\nBiology",
+        type: "primary-concept",
+        angle: 0,
+        distance: 220,
+        connectionType: "thick-connection",
+        description: "Fundamental cellular mechanisms of telomere dysfunction and disease",
+        facts: [
+          "Telomeres shorten to critical 4KB threshold triggering disease",
+          "IPF is the only disease strongly associated with short telomeres",
+          "Genetic anticipation causes earlier/different disease in each generation",
+          "TINF2 mutations are the most severe, typically fatal in childhood"
+        ]
+      },
+      {
+        id: "clinical-manifestations",
+        name: "Clinical\nManifestations",
+        type: "primary-concept",
+        angle: 60,
+        distance: 220,
+        connectionType: "thick-connection",
+        description: "Multi-system complications seen in telomere disease patients",
+        facts: [
+          "Earlier disease onset by 10 years compared to non-telomere IPF",
+          "Multi-organ involvement: lungs, bone marrow, liver",
+          "Increased susceptibility to squamous cell skin cancers",
+          "Progressive nature with organ failure cascade"
+        ]
+      },
+      {
+        id: "immune-dysfunction",
+        name: "Immune\nDysfunction",
+        type: "primary-concept",
+        angle: 120,
+        distance: 220,
+        connectionType: "thick-connection",
+        description: "Compromised immune responses due to T cell senescence",
+        facts: [
+          "T cells unable to expand when challenged with antigens",
+          "Double the number of senescent TEMRA cells expressing CD57",
+          "Impaired CMV control with shorter time to viremia",
+          "Increased risk of PTLD - only in IPF among lung diseases"
+        ]
+      },
+      {
+        id: "diagnostic-approach",
+        name: "Diagnostic\nApproach",
+        type: "primary-concept",
+        angle: 180,
+        distance: 220,
+        connectionType: "thick-connection",
+        description: "Methods for identifying and evaluating telomere disease",
+        facts: [
+          "Flow-FISH remains gold standard for telomere measurement",
+          "TelSeq allows measurement from whole genome sequencing",
+          "Reflex genetic testing for patients below 10th percentile",
+          "Family screening recommended for relatives over 40"
+        ]
+      },
+      {
+        id: "treatment-innovations",
+        name: "Treatment\nInnovations",
+        type: "primary-concept",
+        angle: 240,
+        distance: 220,
+        connectionType: "thick-connection",
+        description: "Novel therapeutic approaches based on telomere biology",
+        facts: [
+          "Belatacept replaces mycophenolate to avoid cytopenias",
+          "Letermovir as bone marrow-sparing antiviral",
+          "Precision medicine based on cellular mechanisms",
+          "TINF2 somatic rescue mutations point to gene therapy targets"
+        ]
+      },
+      {
+        id: "research-breakthroughs",
+        name: "Research\nBreakthroughs",
+        type: "primary-concept",
+        angle: 300,
+        distance: 220,
+        connectionType: "thick-connection",
+        description: "Cutting-edge discoveries transforming understanding and treatment",
+        facts: [
+          "Somatic mutations rescue TINF2 patients - nature's gene therapy",
+          "Telomere dysfunction protects against metabolic syndrome",
+          "Spatial lung analysis reveals disease patterns",
+          "Bench-to-bedside collaboration drives rapid progress"
+        ]
+      }
+    ];
+
+    // SECONDARY Concepts
+    const secondaryConcepts = [
+      {
+        id: "genetic-anticipation",
+        name: "Genetic\nAnticipation",
+        type: "secondary-concept",
+        parentId: "telomere-biology",
+        angle: 330,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Progressive telomere shortening and earlier disease across generations",
+        facts: [
+          "Disease presents up to decade earlier each generation",
+          "Clinical phenotype changes: IPF → liver disease → aplastic anemia",
+          "Explains why families present to different specialists",
+          "Complicates traditional genetic counseling approaches"
+        ]
+      },
+      {
+        id: "telomere-measurement",
+        name: "Telomere\nMeasurement",
+        type: "secondary-concept",
+        parentId: "telomere-biology",
+        angle: 30,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Methods for quantifying telomere length clinically",
+        facts: [
+          "Normal telomeres ~11KB at birth, shorten with age",
+          "Critical threshold around 4KB triggers disease",
+          "Flow-FISH provides age-adjusted percentiles",
+          "TelSeq enables measurement from existing sequencing data"
+        ]
+      },
+      {
+        id: "bone-marrow-failure",
+        name: "Bone Marrow\nFailure",
+        type: "secondary-concept",
+        parentId: "clinical-manifestations",
+        angle: 90,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Progressive cytopenia development post-transplant",
+        facts: [
+          "Platelets drop first and most severely",
+          "Requires growth factor support in many patients",
+          "More transfusions needed outside perioperative period",
+          "Can progress to complete marrow failure requiring transplant"
+        ]
+      },
+      {
+        id: "cmv-complications",
+        name: "CMV\nComplications",
+        type: "secondary-concept",
+        parentId: "immune-dysfunction",
+        angle: 90,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Cytomegalovirus reactivation and organ involvement",
+        facts: [
+          "Recurrent CMV in gut with viremia episodes",
+          "T cells fail to control virus despite prophylaxis",
+          "Loss of T-bet expression impairs interferon production",
+          "Associated with increased mortality and graft loss"
+        ]
+      },
+      {
+        id: "ptld-risk",
+        name: "PTLD\nRisk",
+        type: "secondary-concept",
+        parentId: "immune-dysfunction",
+        angle: 150,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Post-transplant lymphoproliferative disorder susceptibility",
+        facts: [
+          "IPF only lung disease with increased PTLD risk",
+          "EBV-driven due to impaired T cell surveillance",
+          "Patients die quicker from PTLD than other groups",
+          "Requires heightened monitoring and early intervention"
+        ]
+      },
+      {
+        id: "genetics-clinic",
+        name: "Genetics\nClinic",
+        type: "secondary-concept",
+        parentId: "diagnostic-approach",
+        angle: 210,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Specialized multidisciplinary clinic for telomere diseases",
+        facts: [
+          "Established at UPMC in July 2023",
+          "Screens all ILD transplant patients",
+          "Coordinates hepatology and hematology care",
+          "Provides family counseling and testing"
+        ]
+      },
+      {
+        id: "belatacept-protocol",
+        name: "Belatacept\nProtocol",
+        type: "secondary-concept",
+        parentId: "treatment-innovations",
+        angle: 210,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Novel immunosuppression avoiding antiproliferative toxicity",
+        facts: [
+          "Blocks T cell costimulation without requiring proliferation",
+          "Maintains calcineurin inhibitor and steroids",
+          "Transition to everolimus after 2-3 months",
+          "First report showing successful adaptation for telomere patients"
+        ]
+      },
+      {
+        id: "tinf2-escape",
+        name: "TINF2\nEscape",
+        type: "secondary-concept",
+        parentId: "research-breakthroughs",
+        angle: 270,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Somatic rescue mutations enabling survival in severe telomere disease",
+        facts: [
+          "TINF2 normally fatal in first decade of life",
+          "Three patients survived via spontaneous bone marrow mutations",
+          "50% of escape patients have mutation at same genomic position",
+          "Nature's phase 1 gene therapy trial showing safety"
+        ]
+      },
+      {
+        id: "metabolic-protection",
+        name: "Metabolic\nProtection",
+        type: "secondary-concept",
+        parentId: "research-breakthroughs",
+        angle: 330,
+        distance: 140,
+        connectionType: "medium-connection",
+        description: "Unexpected benefit of telomere dysfunction on metabolism",
+        facts: [
+          "Protection from Western diet-induced metabolic disease",
+          "Challenges assumptions about aging being universally harmful",
+          "May explain metabolic health in some centenarians",
+          "Opens new research into aging-metabolism connections"
+        ]
+      }
+    ];
+
+    // TERTIARY Concepts
+    const tertiaryConcepts = [
+      {
+        id: "senescent-cells",
+        name: "Senescent\nT Cells",
+        type: "tertiary-concept",
+        parentId: "cmv-complications",
+        angle: 60,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "CD57+ TEMRA cells unable to proliferate",
+        facts: [
+          "Two-fold increase in terminally differentiated cells",
+          "Cannot enter cell cycle when stimulated",
+          "Explains failure of conventional immunosuppression",
+          "Persist despite successful CMV treatment"
+        ]
+      },
+      {
+        id: "family-screening",
+        name: "Family\nScreening",
+        type: "tertiary-concept",
+        parentId: "genetics-clinic",
+        angle: 180,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Testing recommendations for at-risk relatives",
+        facts: [
+          "Recommended for siblings over age 40",
+          "Earlier testing if symptomatic",
+          "Genetic counseling essential due to anticipation",
+          "May identify disease before symptoms appear"
+        ]
+      },
+      {
+        id: "drug-mechanisms",
+        name: "Mechanism\nInsights",
+        type: "tertiary-concept",
+        parentId: "belatacept-protocol",
+        angle: 240,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Why belatacept works where mycophenolate fails",
+        facts: [
+          "CTLA4-Ig blocks CD80/86-CD28 costimulation",
+          "Works independent of cell proliferation",
+          "Mycophenolate targets proliferation these cells lack",
+          "Represents true precision medicine approach"
+        ]
+      },
+      {
+        id: "therapeutic-targets",
+        name: "Gene Therapy\nTargets",
+        type: "tertiary-concept",
+        parentId: "tinf2-escape",
+        angle: 300,
+        distance: 110,
+        connectionType: "thin-connection",
+        description: "Potential interventions based on natural rescue",
+        facts: [
+          "Convergent evolution identifies safe intervention sites",
+          "Could use CRISPR to introduce rescue mutations",
+          "Small molecules might mimic mutation effects",
+          "Tissue-specific telomerase activation possible"
+        ]
+      }
+    ];
+
+    // Initialize concept map
+    function initializeConceptMap() {
+      const container = document.getElementById('concept-map-container');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      // Create center concept
+      createConcept(centerConcept, centerX, centerY);
+
+      // Create primary concepts
+      primaryConcepts.forEach(concept => {
+        const angleRad = concept.angle * (Math.PI / 180);
+        const x = centerX + Math.cos(angleRad) * concept.distance;
+        const y = centerY + Math.sin(angleRad) * concept.distance;
+
+        createConcept(concept, x, y);
+        createConnection(centerX, centerY, x, y, concept.connectionType, concept.angle);
+      });
+
+      // Create secondary concepts
+      secondaryConcepts.forEach(concept => {
+        const parent = primaryConcepts.find(p => p.id === concept.parentId);
+        if (parent) {
+          const parentAngleRad = parent.angle * (Math.PI / 180);
+          const parentX = centerX + Math.cos(parentAngleRad) * parent.distance;
+          const parentY = centerY + Math.sin(parentAngleRad) * parent.distance;
+
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+
+      // Create tertiary concepts
+      tertiaryConcepts.forEach(concept => {
+        let parentX, parentY;
+        const parent = secondaryConcepts.find(p => p.id === concept.parentId);
+        
+        if (parent) {
+          const grandParent = primaryConcepts.find(p => p.id === parent.parentId);
+          if (grandParent) {
+            const grandParentAngleRad = grandParent.angle * (Math.PI / 180);
+            const grandParentX = centerX + Math.cos(grandParentAngleRad) * grandParent.distance;
+            const grandParentY = centerY + Math.sin(grandParentAngleRad) * grandParent.distance;
+
+            const parentAngleRad = parent.angle * (Math.PI / 180);
+            parentX = grandParentX + Math.cos(parentAngleRad) * parent.distance;
+            parentY = grandParentY + Math.sin(parentAngleRad) * parent.distance;
+          }
+        }
+
+        if (parentX && parentY) {
+          const angleRad = concept.angle * (Math.PI / 180);
+          const x = parentX + Math.cos(angleRad) * concept.distance;
+          const y = parentY + Math.sin(angleRad) * concept.distance;
+
+          createConcept(concept, x, y);
+          createConnection(parentX, parentY, x, y, concept.connectionType, concept.angle);
+        }
+      });
+    }
+
+    // Create concept node
+    function createConcept(concept, x, y) {
+      const conceptElement = document.createElement('div');
+      conceptElement.className = `concept ${concept.type}`;
+      conceptElement.id = concept.id;
+      conceptElement.textContent = concept.name;
+      conceptElement.style.left = `${x - 60}px`;
+      conceptElement.style.top = `${y - 60}px`;
+
+      // Add event listeners
+      conceptElement.addEventListener('mouseover', (e) => {
+        e.stopPropagation();
+        showTooltip(concept, e);
+      });
+      conceptElement.addEventListener('mouseout', hideTooltip);
+      conceptElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+      });
+
+      conceptElement.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      });
+      conceptElement.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        showDetails(concept);
+        hideTooltip();
+      });
+
+      document.getElementById('concept-map-container').appendChild(conceptElement);
+
+      setTimeout(() => {
+        conceptElement.style.left = `${x - conceptElement.offsetWidth / 2}px`;
+        conceptElement.style.top = `${y - conceptElement.offsetHeight / 2}px`;
+      }, 0);
+
+      return conceptElement;
+    }
+
+    // Create connection line
+    function createConnection(x1, y1, x2, y2, type, angle) {
+      const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const angleRad = Math.atan2(y2 - y1, x2 - x1);
+
+      const connection = document.createElement('div');
+      connection.className = `connection ${type}`;
+      connection.style.width = `${length}px`;
+      connection.style.left = `${x1}px`;
+      connection.style.top = `${y1}px`;
+      connection.style.transform = `rotate(${angleRad}rad)`;
+
+      document.getElementById('concept-map-container').appendChild(connection);
+    }
+
+    // Show tooltip
+    function showTooltip(concept, event) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = concept.description;
+      tooltip.style.left = `${event.pageX + 15}px`;
+      tooltip.style.top = `${event.pageY + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    // Hide tooltip
+    function hideTooltip() {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    // Show details panel
+    function showDetails(concept) {
+      const detailPanel = document.getElementById('detail-panel');
+      const detailTitle = document.getElementById('detail-title');
+      const detailContent = document.getElementById('detail-content');
+
+      detailTitle.textContent = concept.name.replace(/\n/g, ' ');
+
+      let content = `<p>${concept.description}</p>`;
+
+      if (concept.facts && concept.facts.length > 0) {
+        content += `<h2>Key Facts</h2><div class="fact-list">`;
+        concept.facts.forEach(fact => {
+          content += `<div class="fact-item">• ${fact}</div>`;
+        });
+        content += `</div>`;
+      }
+
+      detailContent.innerHTML = content;
+      detailPanel.style.display = 'block';
+    }
+
+    // Close detail panel
+    document.getElementById('detail-close').addEventListener('click', () => {
+      document.getElementById('detail-panel').style.display = 'none';
+    });
+
+    // Drag functionality
+    let isDragging = false;
+    let startX, startY;
+    let offsetX = 0, offsetY = 0;
+    let currentX = 0, currentY = 0;
+
+    function handleDragStart(e) {
+      if (e.target.classList.contains('concept')) return;
+
+      isDragging = true;
+
+      if (e.type === 'mousedown') {
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchstart') {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+
+      document.getElementById('concept-map-container').style.cursor = 'grabbing';
+    }
+
+    function handleDrag(e) {
+      if (!isDragging) return;
+
+      let currentClientX, currentClientY;
+
+      if (e.type === 'mousemove') {
+        currentClientX = e.clientX;
+        currentClientY = e.clientY;
+        e.preventDefault();
+      } else if (e.type === 'touchmove') {
+        currentClientX = e.touches[0].clientX;
+        currentClientY = e.touches[0].clientY;
+        e.preventDefault();
+      }
+
+      const deltaX = currentClientX - startX;
+      const deltaY = currentClientY - startY;
+
+      currentX = offsetX + deltaX;
+      currentY = offsetY + deltaY;
+
+      const container = document.getElementById('concept-map-container');
+      container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+    }
+
+    function handleDragEnd() {
+      if (!isDragging) return;
+
+      isDragging = false;
+      offsetX = currentX;
+      offsetY = currentY;
+      document.getElementById('concept-map-container').style.cursor = 'move';
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      initializeConceptMap();
+
+      const container = document.getElementById('concept-map-container');
+      container.addEventListener('mousedown', handleDragStart);
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+
+      container.addEventListener('touchstart', handleDragStart, { passive: false });
+      window.addEventListener('touchmove', handleDrag, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      offsetX = 0;
+      offsetY = 0;
+      currentX = 0;
+      currentY = 0;
+      document.getElementById('concept-map-container').innerHTML = '';
+      document.getElementById('concept-map-container').style.transform = '';
+      initializeConceptMap();
+    });
+  </script>
+</body>
+</html>
