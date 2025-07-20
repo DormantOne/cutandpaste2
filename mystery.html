@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Message Forthcoming…</title>
+
 <style>
   body{font-family:system-ui,sans-serif;text-align:center;padding:3rem}
   #secret{white-space:pre-wrap}                 /* preserve every space & newline */
@@ -24,25 +25,23 @@
 </div>
 
 <script>
-/* ───────────────────────────────────────────────────────── ciphertext ── */
-const encryptedBase64 = "Z6a/fm3USnNwpd7JSR6vypwHonW/ptZBIwoisuJuUYvK44QaKCUDmtPW6mrP3gH0l2/qaVsTjgdgxag+wEtGIHHLxRwIjJOiXFeJ1SQFGvWE8ePUdg==";            // <<‑ replace
-/* ─────────────────────────────────────────────────────────────────────── */
+/* ───── paste your Base‑64 ciphertext below ───── */
+const encryptedBase64 =
+  "Z6a/fm3USnNwpd7JSR6vypwHonW/ptZBIwoisuJuUYvK44QaKCUDmtPW6mrP3gH0l2/qaVsTjgdgxag+wEtGIHHLxRwIjJOiXFeJ1SQFGvWE8ePUdg==";
+/* ─────────────────────────────────────────────── */
 
 const encBytes = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
 const iv   = encBytes.slice(0, 12);
 const data = encBytes.slice(12);
 const te   = new TextEncoder(), td = new TextDecoder();
 
-/* If a “%payload” exists in the URL, use it as the password immediately */
+/* ─── auto‑unlock if ?key= is present ─────────── */
 (() => {
-  const url = window.location.href;
-  const idx = url.indexOf('%');
-  if (idx !== -1 && idx < url.length - 1) {
-    let payload = url.slice(idx + 1);           // grab everything after the first %
-    try { payload = decodeURIComponent(payload); } catch { /* raw fallback */ }
-    reveal(payload);                            // auto‑reveal, no UI
-  }
+  const params = new URLSearchParams(location.search);
+  const autoPw = params.get("key");   // null if ?key= not supplied
+  if (autoPw) reveal(autoPw);         // try to reveal immediately
 })();
+/* ─────────────────────────────────────────────── */
 
 /* Manual reveal (password typed by user) */
 async function reveal(manualPw){
@@ -59,7 +58,7 @@ async function reveal(manualPw){
     animate(plain);
     box.style.display='none';
   }catch{
-    if (!manualPw){                               // only shake if it was a manual attempt
+    if (!manualPw){                      // shake only on manual attempts
       const pwInput = document.getElementById('pw');
       pwInput.classList.add('shake');
       setTimeout(()=>pwInput.classList.remove('shake'),420);
