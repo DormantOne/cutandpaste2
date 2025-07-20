@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Ask the Lecture</title>
+<style>
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --warning: #ef4444;
+  --dark: #1e293b;
+  --light: #f8fafc;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--gradient);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+  padding: 0;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: slideDown 0.5s ease-out;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 40px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+h1 {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  animation: slideUp 0.6s ease-out;
+  transition: transform 0.2s, padding 0.4s ease-out;
+}
+
+.info-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.info-card::before {
+  content: '📌';
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+.info-card ol {
+  margin-left: 40px;
+  padding-left: 20px;
+  margin-top: 10px;
+}
+
+.info-card li {
+  margin-bottom: 8px;
+  color: var(--dark);
+}
+
+.info-card li a {
+    color: var(--primary-dark);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.info-card li a:hover {
+    border-bottom-color: var(--primary-dark);
+}
+
+.input-group {
+  margin-bottom: 24px;
+  animation: slideUp 0.7s ease-out;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--dark);
+  font-size: 0.875rem;
+}
+
+textarea#user-query {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: var(--light);
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  resize: none;
+  line-height: 1.5;
+}
+
+textarea#user-query:focus {
+  outline: none;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+}
+
+.btn {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.8s ease-out;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+}
+
+.btn-icon {
+  font-size: 20px;
+}
+
+.output {
+  display: none;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.output-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.output-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 16px 20px;
+  font-weight: 600;
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.output-body {
+  padding: 20px;
+  background: var(--light);
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.output-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.output-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.output-body::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--dark);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+  font-size: 20px;
+  color: var(--success);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Styles for Collapsible Instructions */
+#instructions-header {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-icon {
+  font-size: 1rem;
+  transition: transform 0.3s ease-in-out;
+  transform-origin: center;
+}
+
+#instructions-list {
+  transition: max-height 0.4s ease-out, opacity 0.4s ease-out, margin-top 0.4s ease-out;
+  max-height: 200px; /* A safe value larger than the content height */
+  opacity: 1;
+  overflow: hidden;
+}
+
+#instructions-list.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0 !important; /* Override existing margin */
+}
+
+.toggle-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* Loading animation */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.action-row .btn {
+  margin-top: 0; /* Override default button margin */
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: var(--dark);
+}
+.btn-secondary:hover {
+  background: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .btn {
+    font-size: 1rem;
+    padding: 14px 20px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: rgba(30, 41, 59, 0.95);
+    --light: #1e293b;
+  }
+  
+  textarea#user-query {
+    background: #334155;
+    color: white;
+  }
+  
+  .output-body {
+    background: #1e293b;
+    color: #e2e8f0;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">🎓</div>
+    <h1>Ask the Lecture</h1>
+    <p class="subtitle">Your AI-powered medical education assistant</p>
+  </div>
+
+  <div class="card info-card">
+    <strong id="instructions-header" style="font-size: 1.125rem; display: block; margin-bottom: 12px;">
+      Quick Start Guide
+      <span id="toggle-icon" class="toggle-icon">▼</span>
+    </strong>
+    <ol id="instructions-list">
+      <li><b>First time?</b> <a href="https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/EYiJpSbMSTVPihL5G2kCadsBzf8a2LmCgAhASqCkoAzIKw?e=lsiKOZ" target="_blank">Verify UPMC login here</a> to ensure access.</li>
+      <li>Enter your clinical or guideline question.</li>
+      <li>Click <b>Generate Prompt</b> to create your query.</li>
+      <li>Click <b>Copy & Open Copilot</b> to launch the prompt in UPMC Copilot.</li>
+    </ol>
+  </div>
+
+  <div class="input-group">
+    <label class="input-label" for="user-query">Your Question</label>
+    <textarea id="user-query" rows="2" placeholder="e.g., What is the best treatment for Lyme disease?"></textarea>
+  </div>
+
+  <button class="btn btn-primary" onclick="generateLecturePrompt()">
+    <span class="btn-icon">✨</span>
+    Generate Prompt
+  </button>
+
+  <div class="output" id="output">
+    <div class="output-card">
+      <div class="output-header">
+        <span>📝</span>
+        Generated Prompt
+      </div>
+      <pre class="output-body" id="prompt-body"></pre>
+    </div>
+    <div class="action-row">
+        <button class="btn btn-secondary" onclick="copyPromptOnly()">
+          <span class="btn-icon">📋</span>
+          Copy Prompt
+        </button>
+        <button class="btn btn-primary" onclick="openCopilot()">
+          <span class="btn-icon">🚀</span>
+          Open Copilot
+        </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  Prompt copied successfully!
+</div>
+
+<script>
+const lectureLinks = [
+  {title: 'Lecture 1', url: 'https://upmchs-my.sharepoint.com/:v:/g/personal/znidba_upmc_edu/EYRIKxWF3y9AsV_zib6vHS0BDZtyLcT6zeE1bTjNTdm0GQ?e=c7nDck'},
+  {title: 'Lecture 2', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/Ec87bpo1zrFLmy3FL5mcKO4BBAqom-Om5vz5yaX3dKlHHg?e=neiVRO'},
+  {title: 'Lecture 3', url: 'https://upmchs-my.sharepoint.com/:v:/g/personal/znidba_upmc_edu/Ed_xy4mJzh5PhQkYset1BA0B5xbfTVeJ60fpIiuCv373fg?e=iqdhYd'},
+  {title: 'Lecture 4', url: 'https://upmchs-my.sharepoint.com/:v:/g/personal/znidba_upmc_edu/EUvUBkO29whFlqoeGCfAiEMBaKpTzB42VLgJ4e06KdF5vg?e=ZktkJf'},
+  {title: 'Lecture 5', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/EWlP9mifMoVHqnkvtAWksQQBJMpEYK0ZADBsthpmzbJ-ig'},
+  {title: 'Lecture 6', url: 'https://upmchs-my.sharepoint.com/:v:/g/personal/znidba_upmc_edu/EZMMB09gX39OrkNTW37xiWUBjPBUJLAZN_uqlzSy5W8RJA'},
+  {title: 'Lecture 7', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/EWOcS92VkHhMvs_ad3MWDgUBuNTaLR3J-b4tdsu8ZkHNvg'},
+  {title: 'Lecture 8', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/EVCVuXry_RpNtx3U1oNpHckBViC-Z_PRGsra7AUglIEoyQ'},
+  {title: 'Lecture 9', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/EXXepenKpF5GmDE-iiZx_AkBwaAmeSPlZem936YXvNn-4g'},
+  {title: 'Lecture 10', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/EThPdEiXsKVNjFxj5s27844Bf2jBS7J-ol2Ce1kIC8p33A'},
+  {title: 'Lecture 11', url: 'https://upmchs.sharepoint.com/:v:/s/CMIRFPProviderEducationSeries/EREBFwiHZetAkwmcSJcGdegBmUWyHirUcINR326cANA1Rg'}
+];
+
+let currentPrompt = '';
+
+function generateLecturePrompt() {
+  const query = document.getElementById('user-query').value.trim();
+  if (!query) {
+    // Add visual feedback for empty input
+    const input = document.getElementById('user-query');
+    input.style.borderColor = '#ef4444';
+    input.placeholder = 'Please enter a question first...';
+    setTimeout(() => {
+      input.style.borderColor = 'transparent';
+      input.placeholder = 'e.g., What is the best treatment for Lyme disease?';
+    }, 2000);
+    return;
+  }
+
+  // Build the prompt
+  let prompt = `You are a medical education assistant. The user has asked the following question:\n"${query}"\n\nPlease do the following:\n1. Search the transcript content of the lecture series (listed below).\n2. Quote any relevant sections word-for-word.\n3. Provide a summarized answer.\n4. If needed, supplement from reliable external sources, and specify which information is external.\n\nLecture video sources:\n`;
+  
+  lectureLinks.forEach(l => {
+    prompt += `- ${l.title}: ${l.url}\n`;
+  });
+
+  prompt += `\nFormat your answer with two parts:\n• Lecture Evidence (quoted and cited with video link)\n• Additional Context (only if needed, with source citation)\n\nProvide accurate, clear, and cited information.`;
+
+  // Display the output with animation
+  document.getElementById('prompt-body').textContent = prompt;
+  document.getElementById('output').style.display = 'block';
+  currentPrompt = prompt;
+
+  // Collapse instructions on first successful use, if not already collapsed.
+  if (localStorage.getItem(instructionsCollapsedKey) === null) {
+    const list = document.getElementById('instructions-list');
+    const icon = document.getElementById('toggle-icon');
+    if (list && !list.classList.contains('collapsed')) {
+        list.classList.add('collapsed');
+        icon.classList.add('collapsed');
+        localStorage.setItem(instructionsCollapsedKey, 'true');
+    }
+  }
+
+  // Scroll to output smoothly
+  setTimeout(() => {
+    document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function copyPromptOnly() {
+  if (!currentPrompt) {
+    showToast('No prompt to copy!', false);
+    return;
+  }
+
+  // First, try the modern Clipboard API
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(currentPrompt).then(() => {
+      showToast('Prompt copied successfully!', true);
+    }).catch(err => {
+      // This can happen if the user denies clipboard permission.
+      showToast('Could not copy prompt.', false);
+      console.error('Clipboard API copy failed:', err);
+    });
+  } else {
+    // Fallback for older browsers or non-secure contexts (HTTP)
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = currentPrompt;
+      
+      // Make the textarea invisible
+      textArea.style.position = 'fixed';
+      textArea.style.top = '-9999px';
+      textArea.style.left = '-9999px';
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showToast('Prompt copied successfully!', true);
+      } else {
+        showToast('Failed to copy prompt.', false);
+      }
+      
+      document.body.removeChild(textArea);
+    } catch (err) {
+      showToast('Failed to copy prompt.', false);
+      console.error('Fallback copy failed:', err);
+    }
+  }
+}
+
+function openCopilot() {
+  // This URL has a higher chance of triggering the "Work" context or login flow.
+  window.open('https://copilot.microsoft.com/?edge_provider=BING_ENTERPRISE', '_blank');
+}
+
+function showToast(message, success = true) {
+  const toast = document.getElementById('toast');
+  toast.innerHTML = `
+    <span class="toast-icon">${success ? '✓' : '✗'}</span>
+    ${message}
+  `;
+  if (!success) {
+    toast.style.background = '#ef4444';
+  }
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    if (!success) {
+      toast.style.background = '';
+    }
+  }, 3000);
+}
+
+// Add enter key support
+document.getElementById('user-query').addEventListener('keypress', function(e) {
+  // Submit on Enter, but allow newline with Shift+Enter
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); // Prevents adding a new line
+    generateLecturePrompt();
+  }
+});
+
+// Add touch feedback for mobile
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('touchstart', function() {
+    this.style.transform = 'scale(0.95)';
+  });
+  btn.addEventListener('touchend', function() {
+    this.style.transform = '';
+  });
+});
+
+// --- Collapsible UI Logic ---
+const instructionsCollapsedKey = 'atl-instructions-collapsed';
+
+function toggleInstructions() {
+    const list = document.getElementById('instructions-list');
+    const icon = document.getElementById('toggle-icon');
+    if (!list || !icon) return;
+
+    const isCollapsed = list.classList.toggle('collapsed');
+    icon.classList.toggle('collapsed', isCollapsed);
+    localStorage.setItem(instructionsCollapsedKey, isCollapsed);
+}
+
+// Single listener for all page-load setup
+document.addEventListener('DOMContentLoaded', () => {
+    // Setup for collapsible instructions
+    const instructionsHeader = document.getElementById('instructions-header');
+    const instructionsList = document.getElementById('instructions-list');
+    const toggleIcon = document.getElementById('toggle-icon');
+
+    if (instructionsHeader) {
+        instructionsHeader.addEventListener('click', toggleInstructions);
+    }
+    if (localStorage.getItem(instructionsCollapsedKey) === 'true') {
+        if (instructionsList) instructionsList.classList.add('collapsed');
+        if (toggleIcon) toggleIcon.classList.add('collapsed');
+    }
+});
+</script>
+</body>
+</html>
