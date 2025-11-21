@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Yes / No Face</title>
+  <title>Expressive Yes / No</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
     :root {
-      --base-bg: #000000;
-      --text-color: #ffffff;
+      --bg: #000000;
       --yes-color: #18c94f;
       --no-color: #e53935;
       --face-skin: #ffe0b2;
+      --face-outline: #222222;
+      --face-shadow: rgba(0, 0, 0, 0.4);
     }
 
     * {
@@ -23,27 +24,33 @@
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         sans-serif;
-      background-color: var(--base-bg);
-      color: var(--text-color);
+      background-color: var(--bg);
+      color: #ffffff;
       min-height: 100vh;
+      display: flex;
     }
 
     .screen {
-      min-height: 100vh;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: stretch;
-      justify-content: stretch;
+      min-height: 100vh;
     }
 
-    /* YES on top, NO on bottom */
-    .choice {
+    /* TOP: YES / NO BUTTONS */
+    .top-bar {
+      display: flex;
+      width: 100%;
+      flex: 0 0 30vh;
+    }
+
+    .choice-btn {
+      flex: 1 1 50%;
       border: none;
       margin: 0;
       padding: 0;
-      flex: 0 0 30vh; /* tall press areas */
-      font-size: 3rem;
-      font-weight: 800;
+      font-size: 2.5rem;
+      font-weight: 900;
       text-transform: uppercase;
       cursor: pointer;
       touch-action: manipulation;
@@ -56,20 +63,20 @@
 
     .btn-yes {
       background-color: var(--yes-color);
-      color: #000;
+      color: #000000;
     }
 
     .btn-no {
       background-color: var(--no-color);
-      color: #fff;
+      color: #ffffff;
     }
 
-    .choice:focus-visible {
+    .choice-btn:focus-visible {
       outline: 4px solid #ffd966;
       outline-offset: -4px;
     }
 
-    /* Middle area: cartoon face + YES/NO text */
+    /* MIDDLE: FACE + MESSAGE */
     .middle {
       flex: 1 1 auto;
       display: flex;
@@ -77,20 +84,19 @@
       align-items: center;
       justify-content: center;
       padding: 0.5rem;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
     #message {
       font-size: 3rem;
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-align: center;
-      min-height: 1em;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      min-height: 1.2em;
+      text-shadow: 0 0 10px var(--face-shadow);
     }
 
-    /* Cartoon face */
     .face-wrapper {
       display: flex;
       align-items: center;
@@ -99,118 +105,190 @@
     }
 
     .face {
-      width: 160px;
-      height: 160px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
-      background-color: var(--face-skin);
+      background: radial-gradient(circle at 30% 25%, #fff5e6, var(--face-skin));
       position: relative;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      transition: transform 0.15s ease-out;
+      box-shadow: 0 12px 26px var(--face-shadow);
+      border: 3px solid var(--face-outline);
       display: flex;
       align-items: center;
       justify-content: center;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+      perspective: 800px;
     }
 
     .face-inner {
-      width: 75%;
-      height: 75%;
+      width: 78%;
+      height: 78%;
       position: relative;
     }
 
+    /* Eyes */
     .eyes {
       position: absolute;
       top: 30%;
       left: 50%;
-      width: 70%;
+      width: 75%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .eye {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000000;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Brows */
+    .brows {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      width: 75%;
       transform: translateX(-50%);
       display: flex;
       justify-content: space-between;
     }
 
-    .eye {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #000;
+    .brow {
+      width: 32px;
+      height: 6px;
+      border-radius: 4px;
+      background: #000000;
+      transition: transform 0.15s ease-out;
     }
 
+    .brow-left {
+      transform-origin: left center;
+    }
+
+    .brow-right {
+      transform-origin: right center;
+    }
+
+    /* Mouth */
     .mouth {
       position: absolute;
       left: 50%;
-      width: 65%;
-      height: 26px;
+      width: 68%;
+      height: 30px;
       transform: translateX(-50%);
-      border: 4px solid #000;
+      border-width: 4px;
+      border-style: solid;
       border-radius: 999px / 200px;
       background: transparent;
     }
 
-    /* Neutral mouth (hidden by default) */
     .mouth-neutral {
-      border-color: #000 transparent transparent transparent;
-      bottom: 25%;
+      bottom: 26%;
+      border-color: #000000 transparent transparent transparent;
       opacity: 0.3;
     }
 
     .mouth-smile {
-      border-color: #000 transparent transparent transparent;
       bottom: 22%;
+      border-color: #000000 transparent transparent transparent;
+      opacity: 1;
     }
 
     .mouth-frown {
-      border-color: transparent transparent #000 transparent;
-      bottom: 30%;
+      bottom: 32%;
+      border-color: transparent transparent #000000 transparent;
+      opacity: 1;
     }
 
-    /* Animations */
-    @keyframes nod {
-      0% { transform: translateY(-8px) rotate(0deg); }
-      50% { transform: translateY(8px) rotate(0deg); }
-      100% { transform: translateY(0) rotate(0deg); }
+    /* YES animation: nod & pop (3D-ish) */
+    @keyframes nod3d {
+      0%   { transform: translateY(-8px) rotateX(12deg); box-shadow: 0 14px 26px var(--face-shadow); }
+      40%  { transform: translateY(8px) rotateX(-10deg); box-shadow: 0 6px 18px var(--face-shadow); }
+      80%  { transform: translateY(-4px) rotateX(6deg); box-shadow: 0 10px 22px var(--face-shadow); }
+      100% { transform: translateY(0) rotateX(0deg); box-shadow: 0 12px 26px var(--face-shadow); }
     }
 
-    @keyframes shake {
-      0% { transform: translateX(-8px); }
-      25% { transform: translateX(8px); }
-      50% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
-      100% { transform: translateX(0); }
+    /* NO animation: shake with tilt */
+    @keyframes shake3d {
+      0%   { transform: translateX(-8px) rotateZ(-6deg); }
+      25%  { transform: translateX(8px) rotateZ(6deg); }
+      50%  { transform: translateX(-6px) rotateZ(-4deg); }
+      75%  { transform: translateX(6px) rotateZ(4deg); }
+      100% { transform: translateX(0) rotateZ(0deg); }
     }
 
     .face-nod {
-      animation: nod 0.45s ease-out;
+      animation: nod3d 0.5s ease-out;
     }
 
     .face-shake {
-      animation: shake 0.45s ease-out;
+      animation: shake3d 0.45s ease-out;
+    }
+
+    /* Expressive brows for YES/NO */
+    .brows-yes .brow-left {
+      transform: rotate(-10deg) translateY(-2px);
+    }
+    .brows-yes .brow-right {
+      transform: rotate(10deg) translateY(-2px);
+    }
+
+    .brows-no .brow-left {
+      transform: rotate(12deg) translateY(2px);
+    }
+    .brows-no .brow-right {
+      transform: rotate(-12deg) translateY(2px);
     }
 
     @media (min-width: 600px) {
-      .choice {
-        font-size: 3.2rem;
+      .choice-btn {
+        font-size: 2.8rem;
       }
       #message {
-        font-size: 3.5rem;
+        font-size: 3.4rem;
       }
       .face {
-        width: 180px;
-        height: 180px;
+        width: 200px;
+        height: 200px;
       }
     }
   </style>
 </head>
 <body>
   <div class="screen">
-    <!-- YES at the top -->
-    <button id="yesBtn" class="choice btn-yes" type="button" aria-label="Yes">
-      YES
-    </button>
+    <!-- Buttons ON TOP -->
+    <div class="top-bar">
+      <button
+        id="yesBtn"
+        class="choice-btn btn-yes"
+        type="button"
+        aria-label="Yes"
+      >
+        YES
+      </button>
+      <button
+        id="noBtn"
+        class="choice-btn btn-no"
+        type="button"
+        aria-label="No"
+      >
+        NO
+      </button>
+    </div>
 
-    <!-- Cartoon face + big YES/NO text -->
+    <!-- Cartoon face + YES/NO text -->
     <div class="middle">
       <div class="face-wrapper">
         <div id="face" class="face">
           <div class="face-inner">
+            <div id="brows" class="brows">
+              <div class="brow brow-left"></div>
+              <div class="brow brow-right"></div>
+            </div>
             <div class="eyes">
               <div class="eye"></div>
               <div class="eye"></div>
@@ -221,11 +299,6 @@
       </div>
       <div id="message" role="status" aria-live="polite"></div>
     </div>
-
-    <!-- NO at the bottom -->
-    <button id="noBtn" class="choice btn-no" type="button" aria-label="No">
-      NO
-    </button>
   </div>
 
   <script>
@@ -233,41 +306,65 @@
       if (!("speechSynthesis" in window)) return;
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text.toUpperCase());
-      utter.rate = 0.8; // a bit slower
+      utter.rate = 0.8; // slower, clearer
       utter.pitch = 1.0;
       window.speechSynthesis.speak(utter);
     }
 
-    function animateFace(type) {
+    function resetFace() {
       const face = document.getElementById("face");
       const mouth = document.getElementById("mouth");
+      const brows = document.getElementById("brows");
 
       face.classList.remove("face-nod", "face-shake");
-      mouth.classList.remove("mouth-smile", "mouth-frown", "mouth-neutral");
+      mouth.classList.remove("mouth-smile", "mouth-frown");
+      brows.classList.remove("brows-yes", "brows-no");
+      mouth.classList.add("mouth-neutral");
+    }
 
-      // Force reflow so animation restarts cleanly
+    function animateFaceYes() {
+      const face = document.getElementById("face");
+      const mouth = document.getElementById("mouth");
+      const brows = document.getElementById("brows");
+
+      face.classList.remove("face-nod", "face-shake");
+      mouth.classList.remove("mouth-neutral", "mouth-frown");
+      brows.classList.remove("brows-no");
+
+      // Force reflow to restart animation
       void face.offsetWidth;
 
-      if (type === "yes") {
-        mouth.classList.add("mouth-smile");
-        face.classList.add("face-nod");
-      } else if (type === "no") {
-        mouth.classList.add("mouth-frown");
-        face.classList.add("face-shake");
-      } else {
-        mouth.classList.add("mouth-neutral");
-      }
+      mouth.classList.add("mouth-smile");
+      brows.classList.add("brows-yes");
+      face.classList.add("face-nod");
+    }
+
+    function animateFaceNo() {
+      const face = document.getElementById("face");
+      const mouth = document.getElementById("mouth");
+      const brows = document.getElementById("brows");
+
+      face.classList.remove("face-nod", "face-shake");
+      mouth.classList.remove("mouth-neutral", "mouth-smile");
+      brows.classList.remove("brows-yes");
+
+      // Force reflow
+      void face.offsetWidth;
+
+      mouth.classList.add("mouth-frown");
+      brows.classList.add("brows-no");
+      face.classList.add("face-shake");
     }
 
     function showResponse(answer) {
       const message = document.getElementById("message");
       if (answer === "yes") {
         message.textContent = "YES";
-        animateFace("yes");
+        animateFaceYes();
         speak("yes");
       } else {
         message.textContent = "NO";
-        animateFace("no");
+        animateFaceNo();
         speak("no");
       }
     }
