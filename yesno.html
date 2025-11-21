@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Yes / No</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --base-bg: #000000;
+      --base-text: #ffffff;
+      --yes-color: #18c94f;
+      --no-color: #e53935;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background-color: var(--base-bg);
+      color: var(--base-text);
+      min-height: 100vh;
+    }
+
+    .screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start; /* buttons at top */
+      align-items: stretch;
+      transition: background-color 0.15s ease-out;
+      background-color: var(--base-bg);
+    }
+
+    .screen.yes-active {
+      background-color: var(--yes-color);
+    }
+
+    .screen.no-active {
+      background-color: var(--no-color);
+    }
+
+    .top-row {
+      display: flex;
+      width: 100%;
+      height: 50vh; /* top half of the screen is tappable area */
+    }
+
+    button.choice {
+      flex: 1 1 50%;
+      border: none;
+      margin: 0;
+      padding: 0;
+      border-radius: 0;
+      font-size: 2.5rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-yes {
+      background-color: var(--yes-color);
+      color: #000000;
+    }
+
+    .btn-no {
+      background-color: var(--no-color);
+      color: #ffffff;
+    }
+
+    button.choice:focus-visible {
+      outline: 4px solid #ffd966;
+      outline-offset: -4px;
+    }
+
+    .message-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    #message {
+      font-size: 4rem;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+      min-height: 1em;
+      letter-spacing: 0.08em;
+    }
+
+    @media (min-width: 600px) {
+      button.choice {
+        font-size: 3rem;
+      }
+
+      #message {
+        font-size: 5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="screen" class="screen">
+    <div class="top-row">
+      <button
+        id="yesBtn"
+        class="choice btn-yes"
+        type="button"
+        aria-label="Yes"
+      >
+        YES
+      </button>
+      <button
+        id="noBtn"
+        class="choice btn-no"
+        type="button"
+        aria-label="No"
+      >
+        NO
+      </button>
+    </div>
+
+    <div class="message-area">
+      <div
+        id="message"
+        role="status"
+        aria-live="polite"
+      ></div>
+    </div>
+  </div>
+
+  <script>
+    function speak(text) {
+      if (!("speechSynthesis" in window)) {
+        return; // no TTS support
+      }
+      // Stop any ongoing speech before starting new one
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(text.toUpperCase());
+      utter.rate = 0.8; // a bit slower, easier to understand
+      utter.pitch = 1.0;
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showResponse(answer) {
+      const screen = document.getElementById("screen");
+      const message = document.getElementById("message");
+
+      screen.classList.remove("yes-active", "no-active");
+
+      if (answer === "yes") {
+        screen.classList.add("yes-active");
+        message.textContent = "YES";
+        speak("yes");
+      } else {
+        screen.classList.add("no-active");
+        message.textContent = "NO";
+        speak("no");
+      }
+    }
+
+    (function setupButtons() {
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
+
+      const yesHandler = function (e) {
+        e.preventDefault();
+        showResponse("yes");
+      };
+
+      const noHandler = function (e) {
+        e.preventDefault();
+        showResponse("no");
+      };
+
+      if (window.PointerEvent) {
+        yesBtn.addEventListener("pointerdown", yesHandler);
+        noBtn.addEventListener("pointerdown", noHandler);
+      } else {
+        // Fallback for very old browsers
+        yesBtn.addEventListener("touchstart", yesHandler);
+        noBtn.addEventListener("touchstart", noHandler);
+        yesBtn.addEventListener("mousedown", yesHandler);
+        noBtn.addEventListener("mousedown", noHandler);
+      }
+    })();
+  </script>
+</body>
+</html>
